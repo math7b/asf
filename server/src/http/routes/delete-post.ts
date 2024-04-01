@@ -13,11 +13,11 @@ export async function deletePost(app: FastifyInstance) {
                 postId: postId,
             }
         })
-        const post = await prisma.post.delete({
+        await prisma.post.delete({
             where: {
                 id: postId,
             }
         })
-        return reply.status(201).send({ Post: post })
+        return reply.status(201).send()
     })
 }

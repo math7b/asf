@@ -19,6 +19,6 @@ export async function createPost(app: FastifyInstance) {
                 option,
             }
         })
-        return reply.status(201).send({Post: post})
+        return reply.status(201).send()
     })
 }

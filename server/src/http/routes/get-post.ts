@@ -18,6 +18,6 @@ export async function getPost(app: FastifyInstance) {
                 comments: {}
             }
         })
-        return reply.status(201).send({ PostId: postId, post: post })
+        return reply.status(201).send(post)
     })
 }

@@ -11,7 +11,7 @@ export async function createSubComment(app: FastifyInstance) {
         })
         const { content, postId, parentCommentId } = createCommentBody.parse(request.body)
         const asfCoins = 2
-        const comment = await prisma.comment.create({
+        await prisma.comment.create({
             data: {
                 content,
                 asfCoins,
@@ -19,6 +19,6 @@ export async function createSubComment(app: FastifyInstance) {
                 parentCommentId,
             }
         })
-        return reply.status(201).send({ Comment: comment })
+        return reply.status(201).send()
     })
 }

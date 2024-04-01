@@ -16,6 +16,6 @@ export async function getComment(app: FastifyInstance) {
                 replies: {}
             }
         })
-        return reply.status(201).send({ Comments: comments })
+        return reply.status(201).send(comments)
     })
 }

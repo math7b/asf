@@ -13,11 +13,11 @@ export async function deleteComment(app: FastifyInstance) {
                 parentCommentId: commentId,
             }
         })
-        const comment = await prisma.comment.delete({
+        await prisma.comment.delete({
             where: {
                 id: commentId,
             }
         })
-        return reply.status(201).send({ Comment: comment })
+        return reply.status(201).send()
     })
 }
