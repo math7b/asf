@@ -16,9 +16,20 @@ export const GlobalStyle = createGlobalStyle`
         background-repeat: no-repeat;
     }
 
+    a{
+        text-decoration: none;
+        color: #333;
+    }
+
     body, imput, textare, button {
         font-family: 'Roboto', sans-serif;
         font-weight: 400;
-        font-size: 1rems;
+        font-size: 1rem;
+    }
+
+    button {
+        border: 1px solid #777;
+        border-radius: 8px;
+        font-size: 0.875rem;
     }
 `

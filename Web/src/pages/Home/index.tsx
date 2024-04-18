@@ -1,12 +1,13 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../services/api";
 import {
     Container, Content, Info, Post, Posts, Title
 } from "./styles";
 
-interface Posts {
+export interface Posts {
     id: string;
     title: string;
     content: String;
@@ -24,13 +25,18 @@ export default function Home() {
         });
     }, []);
     console.log(posts);
+
+    if (!posts) {
+        return <div>loading...</div>
+    }
+    
     return (
         <Container>
             <Posts>
                 {posts.map(post => {
                     return (
                         <Post>
-                            <a href="#">
+                            <Link to={`posts/${post.id}`}>
                                 <div key={post.id}>
                                     <Content>
                                         <Title>
@@ -57,7 +63,7 @@ export default function Home() {
                                         alt=""
                                     />
                                 </div>
-                            </a>
+                            </Link>
                         </Post>
                     )
                 })}

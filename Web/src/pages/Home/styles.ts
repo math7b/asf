@@ -18,10 +18,6 @@ export const Posts = styled.div`
 
 export const Post = styled.div`
     width: 40%;
-    a{
-        text-decoration: none;
-        color: #333;
-    }
     img {
         width: 100%;
         border-radius: 0px 0px 24px 24px;
@@ -39,19 +35,21 @@ export const Post = styled.div`
 
 export const Content = styled.div`
     background-color: rgba(211, 211, 211, 0.44);
-    border-radius: 4px 4px 0px 0px;
+    border-radius: 4px 4px 0px 0px;    
 `
 
 export const Title = styled.div`
     display: block;
     padding: 0.5rem 0.25rem 0.25rem 0.5rem;
-
+    font-size: 0.875rem;
 `
 
 export const Info = styled.div`
     display: inline;
     height: 100%;
     margin: 0 0.5rem 0.5rem 0.5rem;
+    font-size: 0.75rem;
+    color: #777;
     p {
         display: inline;
     }
