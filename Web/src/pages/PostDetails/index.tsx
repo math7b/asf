@@ -7,7 +7,7 @@ import {
 import api from "../../services/api";
 import { Posts } from "../Home";
 import {
-    Container, Content, CreateComment, Info, Post, Titulo, Votes
+    Container, Content, CreateComment, CreateReplay, Info, Post, Titulo, Votes
 } from "./styles";
 
 interface PostDetails extends Posts {
@@ -29,19 +29,45 @@ export default function PostDetails() {
     const [newComment, setNewComment] = useState('')
     const [newReply, setNewReply] = useState<{ [key: string]: string }>({});
 
+    const [openReplyBoxId, setOpenReplyBoxId] = useState<string | null>(null);
+    const [comments, setComments] = useState<Comment[]>([]);
+
     const url = window.location.pathname;
     const postId = url.substring(url.lastIndexOf('/') + 1);
 
     useEffect(() => {
-        api.get<PostDetails>(`/posts/${postId}`).then(response => {
-            setPostDetails(response.data);
-        });
-    }, [handleCreateNewComment]);
+        try {
+            api.get<PostDetails>(`/posts/${postId}`).then(response => {
+                setPostDetails(response.data);
+            });
+        } catch (error) {
+            console.error('Error fetching post:', error);
+        }
+    }, [openReplyBoxId]);
 
-    async function handleCreateNewComment(event: FormEvent) {
+    useEffect(() => {
+        if (postDetails) {
+            setComments(postDetails.comments || []);
+        }
+    }, [postDetails]);
+
+    const fetchPostDetails = async () => {
+        try {
+            const response = await api.get<PostDetails>(`/posts/${postId}`);
+            setPostDetails(response.data);
+        } catch (error) {
+            console.error('Error fetching post details:', error);
+        }
+    };
+
+    async function handleNewCommentCreate(event: FormEvent) {
         event.preventDefault();
         const content = newComment;
         await api.post('/create/comment', { content, postId })
+
+        setNewComment('');
+        fetchPostDetails();
+
         return true;
     };
     function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
@@ -52,7 +78,7 @@ export default function PostDetails() {
         event.target.setCustomValidity('Esse campo é obrigatório');
     };
 
-    async function handleCreateNewReply(event: FormEvent, parentCommentId: string | null) {
+    async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
         event.preventDefault();
         const newText = newReply[parentCommentId || ''];
         setNewReply(prevState => ({
@@ -60,6 +86,11 @@ export default function PostDetails() {
             [parentCommentId || '']: newText
         }));
         await api.post('/create/comment/sub', { content: newText, postId, parentCommentId })
+
+        setNewReply(prevState => ({ ...prevState, [parentCommentId || '']: '' }));
+        fetchPostDetails();
+        setOpenReplyBoxId(null);
+
         return true;
     };
     function handleNewReplyChange(event: ChangeEvent<HTMLTextAreaElement>, commentId: string) {
@@ -73,6 +104,10 @@ export default function PostDetails() {
         event.target.setCustomValidity('Esse campo é obrigatório');
     };
 
+    const toggleAnswerBox = (commentId: string) => {
+        setOpenReplyBoxId(openReplyBoxId === commentId ? null : commentId);
+
+    };
 
     const renderComments = (comments: Comment[]) => {
         return (
@@ -95,21 +130,32 @@ export default function PostDetails() {
                                 })
                             }</time>
                         </Info>
-                        <p>{comment.content}</p>
-                        <CreateComment onSubmit={(event) => handleCreateNewReply(event, comment.id)}>
-                            <strong>Deixe um comentário</strong>
-                            <textarea
-                                name="reply"
-                                placeholder="Deixe um comentário"
-                                value={newReply[comment.id] || ""}
-                                onChange={(event) => handleNewReplyChange(event, comment.id)}
-                                onInvalid={handleNewReplyInvalid}
-                                required
-                            ></textarea>
-                            <footer>
-                                <button type="submit">Responder</button>
-                            </footer>
-                        </CreateComment>
+                        <Content>{comment.content}
+                        </Content>
+                        <CreateReplay onSubmit={(event) => handleNewReplyCreate(event, comment.id)}>
+                            {openReplyBoxId === comment.id && (
+                                <div>
+                                    <strong>Deixe um comentário</strong>
+                                    <textarea
+                                        name="reply"
+                                        placeholder="Deixe um comentário"
+                                        value={newReply[comment.id] || ""}
+                                        onChange={(event) => handleNewReplyChange(event, comment.id)}
+                                        onInvalid={handleNewReplyInvalid}
+                                        required
+                                    ></textarea>
+                                    <footer>
+                                        <button onClick={() => toggleAnswerBox(comment.id)}>
+                                            Cancelar
+                                        </button>
+                                        <button type="submit">Enviar</button>
+                                    </footer>
+                                </div>
+                            )}
+                            {openReplyBoxId !== comment.id && (
+                                <button onClick={() => toggleAnswerBox(comment.id)}>Responder</button>
+                            )}
+                        </CreateReplay>
                         {comment.replies && comment.replies.length > 0 && renderComments(comment.replies)}
                     </div>
                 </Post>
@@ -147,7 +193,7 @@ export default function PostDetails() {
                             </Content>
                         </div>
                     </Post>
-                    <CreateComment onSubmit={handleCreateNewComment}>
+                    <CreateComment onSubmit={handleNewCommentCreate}>
                         <strong>Deixe um comentário</strong>
                         <textarea
                             name="comment"
@@ -163,7 +209,7 @@ export default function PostDetails() {
                     </CreateComment>
                 </>
             ) : (
-                <h1>loading...</h1>
+                <h1>loading or missing Post.</h1>
             )}
             {postDetails?.comments && renderComments(postDetails.comments)}
         </Container>

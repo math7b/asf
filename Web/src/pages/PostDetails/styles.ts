@@ -119,7 +119,6 @@ export const CreateComment = styled.form`
     }
     
     &:focus-within footer {
-        /* padding: 0.30rem 0.70rem; */
         visibility: visible;
         max-height: none;
     }
@@ -127,5 +126,35 @@ export const CreateComment = styled.form`
     & button {
         margin-top: 12px;
         padding: 0.30rem 0.70rem;
+    }
+`
+
+export const CreateReplay = styled.form`
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    
+    width: 100%;
+    padding-top: 1rem;
+    padding-left: 1rem;
+    
+    div {
+        margin-bottom: 10px;
+        strong {
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px 20px;
+            border: 1px solid black;
+            border-radius: 8px;
+            resize: none;
+        }
+
+        button {
+            margin-top: 12px;
+            padding: 0.30rem 0.70rem;
+        }
     }
 `
