@@ -106,7 +106,6 @@ export default function PostDetails() {
 
     const toggleAnswerBox = (commentId: string) => {
         setOpenReplyBoxId(openReplyBoxId === commentId ? null : commentId);
-
     };
 
     const renderComments = (comments: Comment[]) => {
@@ -119,9 +118,8 @@ export default function PostDetails() {
                         <span><CaretDown size={20} /></span>
                         <div></div>
                     </Votes>
-                    <div>
+                    <Content>
                         <Info>
-                            <p>{comment.asfCoins}</p>
                             <p>Matheus Barth</p>
                             <time>{
                                 formatDistanceToNow(comment.createAt, {
@@ -130,8 +128,7 @@ export default function PostDetails() {
                                 })
                             }</time>
                         </Info>
-                        <Content>{comment.content}
-                        </Content>
+                        {comment.content}
                         <CreateReplay onSubmit={(event) => handleNewReplyCreate(event, comment.id)}>
                             {openReplyBoxId === comment.id && (
                                 <div>
@@ -157,7 +154,7 @@ export default function PostDetails() {
                             )}
                         </CreateReplay>
                         {comment.replies && comment.replies.length > 0 && renderComments(comment.replies)}
-                    </div>
+                    </Content>
                 </Post>
             ))
         );
@@ -176,7 +173,6 @@ export default function PostDetails() {
                         </Votes>
                         <div>
                             <Info>
-                                <p>{postDetails.asfCoins}</p>
                                 <p>Matheus Barth</p>
                                 <time>{
                                     formatDistanceToNow(postDetails.createdAt, {

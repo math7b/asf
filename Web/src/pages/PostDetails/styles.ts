@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Container = styled.main`
     flex: 1;
-
+    
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -20,8 +20,8 @@ export const Container = styled.main`
 
 export const Post = styled.div`
     display: flex;
+    flex: content;
     width: 100%;
-    
     &:not(:first-child) {
         padding-top: 16px;
         margin-top: 16px;
@@ -30,7 +30,7 @@ export const Post = styled.div`
     button {
         margin-top: 12px;
         padding: 0.30rem 0.70rem;
-    }
+    }   
 `
 
 export const Votes = styled.div`
@@ -55,7 +55,7 @@ export const Votes = styled.div`
             transition-duration: 300ms;
         }
     }
-
+    
     div {
         border-width: 0px 1px 0px 0px;
         border: 1px dotted #999;
@@ -65,8 +65,20 @@ export const Votes = styled.div`
     }
 `
 
+export const Content = styled.div`
+    flex: 1;
+    flex-direction: column;
+    font-size: 1rem;
+    line-height: 1.6;
+    
+    color: #333;
+
+    padding-right: 8px;
+`
+
 export const Info = styled.div`
     display: flex;
+    flex: 1;
     flex-direction: row;
     p {
         margin-right: 8px;
@@ -76,15 +88,6 @@ export const Info = styled.div`
 export const Titulo = styled.div`
     font-size: 2rem;
 
-`
-
-export const Content = styled.div`
-    font-size: 1rem;
-    line-height: 1.6;
-    
-    color: #333;
-
-    padding-right: 8px;
 `
 
 export const Reply = styled.div`
@@ -98,7 +101,6 @@ export const CreateComment = styled.form`
     
     width: 100%;
     padding-top: 1rem;
-    padding-left: 1rem;
     
     strong {
         margin-bottom: 10px;
@@ -137,11 +139,12 @@ export const CreateReplay = styled.form`
     width: 100%;
     padding-top: 1rem;
     padding-left: 1rem;
-    
     div {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
         margin-bottom: 10px;
-        strong {
-        }
+        width: 100%;
 
         textarea {
             width: 100%;
