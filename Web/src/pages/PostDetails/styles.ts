@@ -8,6 +8,7 @@ export const Container = styled.main`
     align-items: center;
     justify-content: center;
 
+    width: 100%;
     max-width: 1012px;
     margin-left: auto;
     margin-right: auto;
@@ -26,11 +27,6 @@ export const Post = styled.div`
         padding-top: 16px;
         margin-top: 16px;
     }
-
-    button {
-        margin-top: 12px;
-        padding: 0.30rem 0.70rem;
-    }   
 `
 
 export const Votes = styled.div`
@@ -73,21 +69,38 @@ export const Content = styled.div`
     
     color: #333;
 
-    padding-right: 8px;
+    /* padding-right: 8px; */
 `
 
 export const Info = styled.div`
     display: flex;
-    flex: 1;
     flex-direction: row;
-    p {
-        margin-right: 8px;
+    align-items: center;
+    justify-content: space-between;
+
+    div {
+        display: flex;
+        flex-direction: row;
+        
+        p {
+            margin-right: 8px;
+        }
+    }
+
+    span {
+        line-height: 0;
+        padding: 3px;
+        margin-left: 2px;
+    }
+
+    span:hover {
+        border-radius: 4px;
+        background: #f0f0f0;
     }
 `
 
 export const Titulo = styled.div`
     font-size: 2rem;
-
 `
 
 export const Reply = styled.div`
@@ -118,16 +131,16 @@ export const CreateComment = styled.form`
     footer {
         visibility: hidden;
         max-height: 0;
+     
+        button {
+            margin-top: 12px;
+            padding: 0.30rem 0.70rem;
+        }
     }
     
     &:focus-within footer {
         visibility: visible;
         max-height: none;
-    }
-
-    & button {
-        margin-top: 12px;
-        padding: 0.30rem 0.70rem;
     }
 `
 
@@ -154,10 +167,10 @@ export const CreateReplay = styled.form`
             border-radius: 8px;
             resize: none;
         }
+    }
 
-        button {
-            margin-top: 12px;
-            padding: 0.30rem 0.70rem;
-        }
+    button {
+        margin-top: 12px;
+        padding: 0.30rem 0.70rem;
     }
 `

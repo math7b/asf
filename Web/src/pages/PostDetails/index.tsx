@@ -1,13 +1,14 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { CaretDown, CaretUp } from "phosphor-react";
-import {
+import { CaretDown, CaretUp, Trash } from "phosphor-react";
+import React, {
     ChangeEvent, FormEvent, InvalidEvent, useEffect, useState
 } from "react";
 import api from "../../services/api";
 import { Posts } from "../Home";
 import {
-    Container, Content, CreateComment, CreateReplay, Info, Post, Titulo, Votes
+    Container, Content, CreateComment, CreateReplay, Info, Post, Titulo,
+    Votes
 } from "./styles";
 
 interface PostDetails extends Posts {
@@ -34,7 +35,7 @@ export default function PostDetails() {
 
     const url = window.location.pathname;
     const postId = url.substring(url.lastIndexOf('/') + 1);
-
+    
     useEffect(() => {
         try {
             api.get<PostDetails>(`/posts/${postId}`).then(response => {
@@ -60,6 +61,14 @@ export default function PostDetails() {
         }
     };
 
+    async function handlePostDelete(event: React.MouseEvent, postId: string) {
+        event.preventDefault;
+        const deletePost = await api.post(`/delete/post/${postId}`);
+        fetchPostDetails();
+        window.location.href = '/';
+        console.log({ deletePost });
+    };
+
     async function handleNewCommentCreate(event: FormEvent) {
         event.preventDefault();
         const content = newComment;
@@ -76,6 +85,13 @@ export default function PostDetails() {
     };
     function handleNewCommentInvalid(event: InvalidEvent<HTMLTextAreaElement>) {
         event.target.setCustomValidity('Esse campo é obrigatório');
+    };
+
+    async function handleReplyDelete(event: React.MouseEvent, commentId: string) {
+        event.preventDefault;
+        const deleteComment = await api.post(`/delete/comment/${commentId}`);
+        fetchPostDetails();
+        console.log({ deleteComment });
     };
 
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
@@ -120,13 +136,16 @@ export default function PostDetails() {
                     </Votes>
                     <Content>
                         <Info>
-                            <p>Matheus Barth</p>
-                            <time>{
-                                formatDistanceToNow(comment.createAt, {
-                                    locale: ptBR,
-                                    addSuffix: true,
-                                })
-                            }</time>
+                            <div>
+                                <p>Matheus Barth</p>
+                                <time>{
+                                    formatDistanceToNow(comment.createAt, {
+                                        locale: ptBR,
+                                        addSuffix: true,
+                                    })
+                                }</time>
+                            </div>
+                            <span onClick={(e) => handleReplyDelete(e, comment.id)}><Trash size={16} /></span>
                         </Info>
                         {comment.content}
                         <CreateReplay onSubmit={(event) => handleNewReplyCreate(event, comment.id)}>
@@ -171,15 +190,18 @@ export default function PostDetails() {
                             <span><CaretDown size={20} /></span>
                             <div></div>
                         </Votes>
-                        <div>
+                        <Content>
                             <Info>
-                                <p>Matheus Barth</p>
-                                <time>{
-                                    formatDistanceToNow(postDetails.createdAt, {
-                                        locale: ptBR,
-                                        addSuffix: true,
-                                    })
-                                }</time>
+                                <div>
+                                    <p>Matheus Barth</p>
+                                    <time>{
+                                        formatDistanceToNow(postDetails.createdAt, {
+                                            locale: ptBR,
+                                            addSuffix: true,
+                                        })
+                                    }</time>
+                                </div>
+                                <span onClick={(e) => handlePostDelete(e, postDetails.id)}><Trash size={16} /></span>
                             </Info>
                             <Titulo>
                                 {postDetails.title}
@@ -187,7 +209,7 @@ export default function PostDetails() {
                             <Content>
                                 {postDetails.content}
                             </Content>
-                        </div>
+                        </Content>
                     </Post>
                     <CreateComment onSubmit={handleNewCommentCreate}>
                         <strong>Deixe um comentário</strong>
