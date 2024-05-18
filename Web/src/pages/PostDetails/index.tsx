@@ -7,9 +7,11 @@ import React, {
 import api from "../../services/api";
 import { Posts } from "../Home";
 import {
-    Container, Content, CreateComment, CreateReplay, Info, Post, Titulo,
+    Content, CreateComment, CreateReplay, Info, Titulo,
     Votes
 } from "./styles";
+
+import { Container, Post } from "../../styles/global";
 
 interface PostDetails extends Posts {
     comments: Comment[];
@@ -35,7 +37,7 @@ export default function PostDetails() {
 
     const url = window.location.pathname;
     const postId = url.substring(url.lastIndexOf('/') + 1);
-    
+
     useEffect(() => {
         try {
             api.get<PostDetails>(`/posts/${postId}`).then(response => {
@@ -63,10 +65,9 @@ export default function PostDetails() {
 
     async function handlePostDelete(event: React.MouseEvent, postId: string) {
         event.preventDefault;
-        const deletePost = await api.post(`/delete/post/${postId}`);
+        await api.post(`/delete/post/${postId}`);
         fetchPostDetails();
         window.location.href = '/';
-        console.log({ deletePost });
     };
 
     async function handleNewCommentCreate(event: FormEvent) {
@@ -89,9 +90,8 @@ export default function PostDetails() {
 
     async function handleReplyDelete(event: React.MouseEvent, commentId: string) {
         event.preventDefault;
-        const deleteComment = await api.post(`/delete/comment/${commentId}`);
+        await api.post(`/delete/comment/${commentId}`);
         fetchPostDetails();
-        console.log({ deleteComment });
     };
 
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {

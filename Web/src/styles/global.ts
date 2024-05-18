@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyle = createGlobalStyle`
     * {
@@ -31,5 +31,34 @@ export const GlobalStyle = createGlobalStyle`
         border: 1px solid #777;
         border-radius: 8px;
         font-size: 0.875rem;
+    }
+`
+
+export const Container = styled.main`
+    flex: 1;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    max-width: 1012px;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding: 1rem 1rem 2rem 1rem;
+
+    background: rgba(999, 999, 999, 0.88);
+    border-radius: 4px 4px 0px 0px;
+`
+
+export const Post = styled.div`
+    display: flex;
+    flex: content;
+    width: 100%;
+    &:not(:first-child) {
+        padding-top: 16px;
+        margin-top: 16px;
     }
 `

@@ -1,34 +1,5 @@
 import styled from "styled-components";
 
-export const Container = styled.main`
-    flex: 1;
-    
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    max-width: 1012px;
-    margin-left: auto;
-    margin-right: auto;
-
-    padding: 1rem 1rem 2rem 1rem;
-
-    background: rgba(999, 999, 999, 0.88);
-    border-radius: 4px 4px 0px 0px;
-`
-
-export const Post = styled.div`
-    display: flex;
-    flex: content;
-    width: 100%;
-    &:not(:first-child) {
-        padding-top: 16px;
-        margin-top: 16px;
-    }
-`
-
 export const Votes = styled.div`
     display: flex;
     flex-direction: column;
@@ -68,8 +39,6 @@ export const Content = styled.div`
     line-height: 1.6;
     
     color: #333;
-
-    /* padding-right: 8px; */
 `
 
 export const Info = styled.div`
