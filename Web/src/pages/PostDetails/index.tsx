@@ -63,6 +63,30 @@ export default function PostDetails() {
         }
     };
 
+    async function handleCherishPost(event: React.MouseEvent, postId: string) {
+        event.preventDefault;
+        await api.post(`/cherish/post/${postId}`);
+        fetchPostDetails();
+    }
+
+    async function handleCherishComment(event: React.MouseEvent, commentId: string) {
+        event.preventDefault;
+        await api.post(`/cherish/comment/${commentId}`);
+        fetchPostDetails();
+    }
+
+    async function handleDepreciatePost(event: React.MouseEvent, postId: string) {
+        event.preventDefault;
+        await api.post(`/depreciate/post/${postId}`);
+        fetchPostDetails();
+    }
+
+    async function handleDepreciateComment(event: React.MouseEvent, commentId: string) {
+        event.preventDefault;
+        await api.post(`/depreciate/comment/${commentId}`);
+        fetchPostDetails();
+    }
+
     async function handlePostDelete(event: React.MouseEvent, postId: string) {
         event.preventDefault;
         await api.post(`/delete/post/${postId}`);
@@ -129,9 +153,13 @@ export default function PostDetails() {
             comments.map(comment => (
                 <Post key={comment.id}>
                     <Votes>
-                        <span><CaretUp size={20} /></span>
+                        <span onClick={(e) => handleCherishComment(e, comment.id)}>
+                            <CaretUp size={20} />
+                        </span>
                         <p>{comment.asfCoins}</p>
-                        <span><CaretDown size={20} /></span>
+                        <span onClick={(e) => handleDepreciateComment(e, comment.id)}>
+                            <CaretDown size={20} />
+                        </span>
                         <div></div>
                     </Votes>
                     <Content>
@@ -145,7 +173,9 @@ export default function PostDetails() {
                                     })
                                 }</time>
                             </div>
-                            <span onClick={(e) => handleReplyDelete(e, comment.id)}><Trash size={16} /></span>
+                            <span onClick={(e) => handleReplyDelete(e, comment.id)}>
+                                <Trash size={16} />
+                            </span>
                         </Info>
                         {comment.content}
                         <CreateReplay onSubmit={(event) => handleNewReplyCreate(event, comment.id)}>
@@ -185,9 +215,11 @@ export default function PostDetails() {
                 <>
                     <Post key={postDetails.id}>
                         <Votes>
-                            <span><CaretUp size={20} /></span>
+                            <span onClick={(e) => handleCherishPost(e, postDetails.id)}><CaretUp size={20} /></span>
                             <p>{postDetails.asfCoins}</p>
-                            <span><CaretDown size={20} /></span>
+                            <span onClick={(e) => handleDepreciatePost(e, postDetails.id)}>
+                                <CaretDown size={20} />
+                            </span>
                             <div></div>
                         </Votes>
                         <Content>

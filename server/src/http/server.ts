@@ -1,15 +1,19 @@
-import { fastify } from 'fastify'
 import cors from '@fastify/cors'
+import { fastify } from 'fastify'
 
+import { cherishComment } from './routes/cherish-comment'
+import { cherishPost } from './routes/cherish-post'
+import { createComment } from './routes/create-comment'
+import { createPost } from './routes/create-post'
+import { createSubComment } from './routes/create-subcomment'
+import { deleteComment } from './routes/delete-comment'
+import { deletePost } from './routes/delete-post'
+import { depreciateComment } from './routes/depreciate-comment'
+import { depreciatePost } from './routes/depreciate-post'
+import { getComment } from './routes/get-comment'
+import { getComments } from './routes/get-comments'
 import { getPost } from './routes/get-post'
 import { getPosts } from './routes/get-posts'
-import { getComments } from './routes/get-comments'
-import { getComment } from './routes/get-comment'
-import { createPost } from './routes/create-post'
-import { createComment } from './routes/create-comment'
-import { createSubComment } from './routes/create-subcomment'
-import { deletePost } from './routes/delete-post'
-import { deleteComment } from './routes/delete-comment'
 
 const app = fastify()
 
@@ -24,6 +28,10 @@ app.register(createComment)
 app.register(createSubComment)
 app.register(deletePost)
 app.register(deleteComment)
+app.register(cherishPost)
+app.register(cherishComment)
+app.register(depreciatePost)
+app.register(depreciateComment)
 
 const port = 3333;
 app.listen({ port }).then(() => {
