@@ -8,8 +8,9 @@ export async function createPost(app: FastifyInstance) {
             title: z.string(),
             content: z.string(),
             option: z.string(),
+            userId: z.string(),
         })
-        const {title, content, option} = createPost.parse(request.body)
+        const { title, content, option, userId } = createPost.parse(request.body)
         const asfCoins = 3
         const post = await prisma.post.create({
             data: {
@@ -17,6 +18,11 @@ export async function createPost(app: FastifyInstance) {
                 content,
                 asfCoins,
                 option,
+                user: {
+                    connect: {
+                        id: userId,
+                    }
+                },
             }
         })
         return reply.status(201).send()

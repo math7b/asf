@@ -61,10 +61,10 @@ model User {
 
   posts     Post[]
   comments  Comment[]
-  beekeeper Beekeeper?
+  beeKeeper BeeKeeper?
 }
 
-model Beekeeper {
+model BeeKeeper {
   id       String  @id @default(uuid())
   isActive Boolean @default(true)
 
