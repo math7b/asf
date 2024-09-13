@@ -14,6 +14,8 @@ import { getComment } from './routes/get-comment'
 import { getComments } from './routes/get-comments'
 import { getPost } from './routes/get-post'
 import { getPosts } from './routes/get-posts'
+import { createUser } from './routes/create-user'
+import { createBeeKeeper } from './routes/create-beeKeeper'
 
 const app = fastify()
 
@@ -26,6 +28,8 @@ app.register(getComment)
 app.register(createPost)
 app.register(createComment)
 app.register(createSubComment)
+app.register(createUser)
+app.register(createBeeKeeper)
 app.register(deletePost)
 app.register(deleteComment)
 app.register(cherishPost)
