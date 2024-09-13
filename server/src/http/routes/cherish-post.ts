@@ -5,22 +5,24 @@ import { prisma } from "../../lib/prisma";
 export async function cherishPost(app: FastifyInstance) {
     app.post('/cherish/post/:postId', async (request, reply) => {
         const cherishPostParams = z.object({
-            postId: z.string().uuid(),
+            postId: z.string(),
+            userId: z.string(),
         })
 
-        const { postId } = cherishPostParams.parse(request.params)
+        const { postId, userId } = cherishPostParams.parse(request.params)
 
-        const post = await prisma.post.update({
+        await prisma.post.update({
             where: {
                 id: postId,
+                userId: userId,
             },
             data: {
                 asfCoins: {
                     increment: 1,
-                }
-            }
+                },
+            },
         })
 
-        return reply.status(201).send({ post });
+        return reply.status(201).send();
     })
 }

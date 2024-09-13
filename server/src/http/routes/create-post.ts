@@ -11,12 +11,11 @@ export async function createPost(app: FastifyInstance) {
             userId: z.string(),
         })
         const { title, content, option, userId } = createPost.parse(request.body)
-        const asfCoins = 3
-        const post = await prisma.post.create({
+        await prisma.post.create({
             data: {
                 title,
                 content,
-                asfCoins,
+                asfCoins: 3,
                 option,
                 user: {
                     connect: {

@@ -6,13 +6,15 @@ export async function cherishComment(app: FastifyInstance) {
     app.post('/cherish/comment/:commentId', async (request, reply) => {
         const cherishCommentParams = z.object({
             commentId: z.string().uuid(),
+            userId: z.string(),
         })
 
-        const { commentId } = cherishCommentParams.parse(request.params)
+        const { commentId, userId } = cherishCommentParams.parse(request.params)
 
-        const comment = await prisma.comment.update({
+        await prisma.comment.update({
             where: {
                 id: commentId,
+                userId: userId,
             },
             data: {
                 asfCoins: {
@@ -21,6 +23,6 @@ export async function cherishComment(app: FastifyInstance) {
             }
         })
 
-        return reply.status(201).send({ comment });
+        return reply.status(201).send();
     })
 }
