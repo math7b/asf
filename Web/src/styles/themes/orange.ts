@@ -3,6 +3,7 @@ export default {
     colors: {
         color_050: '#fff7ed',
         color_100: '#ffedd5',
+        color_200: '#fed7aa',
         color_300: '#fdba74',
         color_400: '#fb923c',
         color_600: '#ea580c',

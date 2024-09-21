@@ -23,7 +23,7 @@ export const GlobalStyle = createGlobalStyle`
 
     a{
         text-decoration: none;
-        color: ${props => props.theme.texts.test_950};
+        color: ${props => props.theme.texts.text_950};
     }
 
     body, imput, textare, button {

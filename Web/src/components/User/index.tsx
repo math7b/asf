@@ -1,6 +1,7 @@
 import { Check } from 'phosphor-react';
-import { AsfCoins, Border, HeaderContainer, Post, PostInfo, Posts, Titulo, UserInfo } from './style'
+import { AsfCash, AsfCoins, Border, Coins, HeaderContainer, Post, PostInfo, Posts, Titulo, UserInfo } from './style'
 import ghost from '/ghost.svg'
+import { Link } from 'react-router-dom';
 
 export function UserBar() {
     return (
@@ -17,19 +18,21 @@ export function UserBar() {
             <Posts>
                 <h4>Interações recentes</h4>
                 <Post>
-                    <PostInfo>
-                        <p>Matheus Barth</p>
-                        <time>
-                            há 5 dias
-                        </time>
-                    </PostInfo>
-                    <Titulo>
-                        <p>A Importância da Sustentabilidade nas Cidades</p>
-                    </Titulo>
-                    <AsfCoins>
-                        <p>AsfCoins: 6</p>
-                        <p>AsfCash: 2</p>
-                    </AsfCoins>
+                    <Link to={"/posts/fec28773-a5f7-4b35-8706-fc0a684b33b4"}>
+                        <PostInfo>
+                            <p>Matheus Barth</p>
+                            <time>
+                                há 5 dias
+                            </time>
+                        </PostInfo>
+                        <Titulo>
+                            <p>A Importância da Sustentabilidade nas Cidades</p>
+                        </Titulo>
+                        <Coins>
+                            <AsfCoins><div></div><p>6</p></AsfCoins>
+                            <AsfCash><div></div><p>2</p></AsfCash>
+                        </Coins>
+                    </Link>
                 </Post>
             </Posts>
         </HeaderContainer>

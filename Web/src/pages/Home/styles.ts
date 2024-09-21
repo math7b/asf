@@ -31,6 +31,14 @@ export const Post = styled.div`
             border-bottom: 1px solid ${props => props.theme.colors.color_800};
         }
     }
+    &:hover a {
+        div {
+            div{
+                background-color: ${props => props.theme.colors.color_200};
+                border-radius: 4px 4px 0px 0px;
+            }
+        }
+    }
 `
 
 export const Content = styled.div`

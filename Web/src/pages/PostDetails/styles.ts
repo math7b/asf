@@ -65,7 +65,7 @@ export const Info = styled.div`
     span:hover {
         cursor: pointer;
         border-radius: 4px;
-        background: ${props => props.theme.texts.text_300};
+        background: ${props => props.theme.colors.color_200};
     }
 `
 
