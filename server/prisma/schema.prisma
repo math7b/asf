@@ -48,8 +48,8 @@ model Comment {
 }
 
 model User {
-  id       String  @id @unique @default(uuid())
-  isActive Boolean @default(true)
+  id String @id @unique @default(uuid())
+  iv String
 
   name      String
   email     String @unique
@@ -65,8 +65,7 @@ model User {
 }
 
 model BeeKeeper {
-  id       String  @id @default(uuid())
-  isActive Boolean @default(true)
+  id String @id @default(uuid())
 
   state       String
   city        String
