@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
+import { newEncrypt } from "../encrypt";
 
 export async function createUser(app: FastifyInstance) {
     app.post('/create/user', async (request, reply) => {
@@ -10,13 +11,18 @@ export async function createUser(app: FastifyInstance) {
             password: z.string(),
         })
         const { name, email, password } = createUser.parse(request.body)
+        const {
+            encryptedData: encryptedPassword,
+            iv
+        } = newEncrypt(password)
         await prisma.user.create({
             data: {
+                iv: iv,
                 name,
                 email,
-                password,
+                password: encryptedPassword,
                 asfCoins: 0,
-                promCoins: 0,
+                asfCash: 0,
             }
         })
         return reply.status(201).send()
