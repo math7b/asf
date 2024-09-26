@@ -25,12 +25,14 @@ export async function createBeeKeeper(app: FastifyInstance) {
                 iv: true,
             }
         })
-
-        const encryptedState = encrypt(state, getIV?.iv)
-        const encryptedCity = encrypt(city, getIV?.iv)
-        const encryptedPhoneNumber = encrypt(phoneNumber, getIV?.iv)
-        const encryptedRG = encrypt(RG, getIV?.iv)
-        const encryptedCPF = encrypt(CPF, getIV?.iv)
+        if(!getIV){
+            return reply.status(400).send({ message: "User don't have a key!" });
+        }
+        const encryptedState = encrypt(state, getIV.iv)
+        const encryptedCity = encrypt(city, getIV.iv)
+        const encryptedPhoneNumber = encrypt(phoneNumber, getIV.iv)
+        const encryptedRG = encrypt(RG, getIV.iv)
+        const encryptedCPF = encrypt(CPF, getIV.iv)
         await prisma.beeKeeper.create({
             data: {
                 state: encryptedState,
