@@ -6,21 +6,23 @@ export async function depreciateComment(app: FastifyInstance) {
     app.post('/depreciate/comment/:commentId', async (request, reply) => {
         const cherishCommentParams = z.object({
             commentId: z.string().uuid(),
+            userId: z.string(),
         })
 
-        const { commentId } = cherishCommentParams.parse(request.params)
+        const { commentId, userId } = cherishCommentParams.parse(request.params)
 
-        const comment = await prisma.comment.update({
+        await prisma.comment.update({
             where: {
                 id: commentId,
+                userId: userId,
             },
             data: {
                 asfCoins: {
                     decrement: 1,
-                }
-            }
+                },
+            },
         })
 
-        return reply.status(201).send({ comment });
+        return reply.status(201).send();
     })
 }

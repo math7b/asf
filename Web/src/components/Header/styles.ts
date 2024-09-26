@@ -1,10 +1,10 @@
 import styled from "styled-components";
 
-export const HeaderContainer = styled.header`
+export const HeaderContainer = styled.div`
     display: flex;
     align-items: start;
     
-    background: #ffd686;
+    background: ${props => props.theme.colors.color_400};
     margin-bottom: 8vh;
     height: 11vh;
     div {

@@ -5,18 +5,21 @@ import { prisma } from "../../lib/prisma";
 export async function deleteComment(app: FastifyInstance) {
     app.post('/delete/comment/:commentId', async (request, reply) => {
         const deleteComment = z.object({
-            commentId: z.string().uuid(),
+            commentId: z.string(),
+            userId: z.string(),
         })
-        const { commentId } = deleteComment.parse(request.params)
-        const comments = await prisma.comment.deleteMany({
+        const { commentId, userId } = deleteComment.parse(request.params)
+        await prisma.comment.deleteMany({
             where: {
                 parentCommentId: commentId,
-            }
+                userId: userId,
+            },
         })
         await prisma.comment.delete({
             where: {
                 id: commentId,
-            }
+                userId: userId,
+            },
         })
         return reply.status(201).send()
     })

@@ -28,13 +28,21 @@ export const Post = styled.div`
     }
     &:hover {
         img{
-            border-bottom: 1px solid #82511a;
+            border-bottom: 1px solid ${props => props.theme.colors.color_800};
+        }
+    }
+    &:hover a {
+        div {
+            div{
+                background-color: ${props => props.theme.colors.color_200};
+                border-radius: 4px 4px 0px 0px;
+            }
         }
     }
 `
 
 export const Content = styled.div`
-    background-color: rgba(211, 211, 211, 0.44);
+    background-color: ${props => props.theme.colors.color_white_opack};
     border-radius: 4px 4px 0px 0px;    
 `
 
@@ -49,7 +57,7 @@ export const Info = styled.div`
     height: 100%;
     margin: 0 0.5rem 0.5rem 0.5rem;
     font-size: 0.75rem;
-    color: #777;
+    color: ${props => props.theme.texts.text_600};
     p {
         display: inline;
     }

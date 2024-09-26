@@ -35,9 +35,9 @@ export default function Home() {
             <Posts>
                 {posts.map(post => {
                     return (
-                        <Post>
+                        <Post key={post.id}>
                             <Link to={`posts/${post.id}`}>
-                                <div key={post.id}>
+                                <div>
                                     <Content>
                                         <Title>
                                             <p>{post.title}</p>
