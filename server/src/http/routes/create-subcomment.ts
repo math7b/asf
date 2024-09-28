@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { connect } from "net";
+import { verifyToken } from "../token";
 
 export async function createSubComment(app: FastifyInstance) {
     app.post('/create/comment/sub', async (request, reply) => {
@@ -10,8 +11,13 @@ export async function createSubComment(app: FastifyInstance) {
             postId: z.string(),
             parentCommentId: z.string().optional(),
             userId: z.string(),
+            token: z.string(),
         })
-        const { content, postId, parentCommentId, userId } = createCommentBody.parse(request.body)
+        const { content, postId, parentCommentId, userId, token } = createCommentBody.parse(request.body)
+        const verifyedToken = verifyToken(token);
+        if (!verifyedToken.valid) {
+            return reply.status(400).send({ message: "Not authorized" });
+        }
         const data: any = {
             content,
             asfCoins: 2,
@@ -31,10 +37,10 @@ export async function createSubComment(app: FastifyInstance) {
             data.parentCommentId = parentCommentId;
         }
 
-        await prisma.comment.create({
+        const subComent = await prisma.comment.create({
             data,
         });
 
-        return reply.status(201).send()
+        return reply.status(201).send({ SubComment: subComent })
     })
 }

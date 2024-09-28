@@ -9,7 +9,7 @@ export function generateToken(
     email: string,
     beeKeeper: null | {}
 ) {
-    const expiresIn = '30s';
+    const expiresIn = '6h';
     const payload = {
         id: userId,
         name: name,

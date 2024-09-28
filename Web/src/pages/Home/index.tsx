@@ -6,37 +6,22 @@ import api from "../../services/api";
 import {
     Container, Content, Info, Post, Posts, Title
 } from "./styles";
-
-export interface Posts {
-    id: string;
-    title: string;
-    content: String;
-    asfCoins: number;
-    createdAt: string;
-    option: String;
-}
+import { useAuth } from "../../components/ContextProviders/AuthContext";
 
 export default function Home() {
-    const [posts, setPosts] = useState<Posts[]>([]);
+    const { userData } = useAuth();
 
-    useEffect(() => {
-        api.get<Posts[]>('/posts').then(response => {
-            setPosts(response.data);
-        });
-    }, []);
-    console.log(posts);
-
-    if (!posts) {
+    if (userData?.posts.length === 0) {
         return <div>loading...</div>
     }
-    
+
     return (
         <Container>
             <Posts>
-                {posts.map(post => {
+                {userData?.posts.map(post => {
                     return (
                         <Post key={post.id}>
-                            <Link to={`posts/${post.id}`}>
+                            <Link to={`../posts/${post.id}`}>
                                 <div>
                                     <Content>
                                         <Title>
@@ -53,12 +38,11 @@ export default function Home() {
                                         </Info>
                                     </Content>
                                     <img src={
-                                        `src/assets/${
-                                            post.option === "event" ? "event.jpg" :
+                                        `src/assets/${post.option === "event" ? "event.jpg" :
                                             post.option === "help" ? "help.jpg" :
-                                            post.option === "question" ? "question.jpg" :
-                                            post.option === "curiosity" ? "curiosity.jpg" : 
-                                            "event.jpg"
+                                                post.option === "question" ? "question.jpg" :
+                                                    post.option === "curiosity" ? "curiosity.jpg" :
+                                                        "event.jpg"
                                         }`}
                                         alt=""
                                     />

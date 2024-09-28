@@ -5,32 +5,20 @@ import React, {
     ChangeEvent, FormEvent, InvalidEvent, useEffect, useState
 } from "react";
 import api from "../../services/api";
-import { Posts } from "../Home";
 import {
     Content, CreateComment, CreateReplay, Info, Titulo,
     Votes
 } from "./styles";
 
 import { Container, Post } from "../../styles/global";
-
-interface PostDetails extends Posts {
-    comments: Comment[];
-}
-
-interface Comment {
-    id: string;
-    content: string;
-    asfCoins: number;
-    createAt: Date;
-    postId: string;
-    parentCommentId: string | null;
-    replies: Comment[];
-}
+import { useAuth, Comment, Posts } from "../../components/ContextProviders/AuthContext";
 
 export default function PostDetails() {
-    const [postDetails, setPostDetails] = useState<PostDetails>();
+    const [postDetails, setPostDetails] = useState<Posts>();
     const [newComment, setNewComment] = useState('')
     const [newReply, setNewReply] = useState<{ [key: string]: string }>({});
+    const { userData, token } = useAuth();
+    const userId = userData?.id
 
     const [openReplyBoxId, setOpenReplyBoxId] = useState<string | null>(null);
     const [comments, setComments] = useState<Comment[]>([]);
@@ -39,24 +27,12 @@ export default function PostDetails() {
     const postId = url.substring(url.lastIndexOf('/') + 1);
 
     useEffect(() => {
-        try {
-            api.get<PostDetails>(`/posts/${postId}`).then(response => {
-                setPostDetails(response.data);
-            });
-        } catch (error) {
-            console.error('Error fetching post:', error);
-        }
-    }, [openReplyBoxId]);
-
-    useEffect(() => {
-        if (postDetails) {
-            setComments(postDetails.comments || []);
-        }
-    }, [postDetails]);
+        fetchPostDetails();
+    }, []);
 
     const fetchPostDetails = async () => {
         try {
-            const response = await api.get<PostDetails>(`/posts/${postId}`);
+            const response = await api.get<Posts>(`/posts/${postId}`);
             setPostDetails(response.data);
         } catch (error) {
             console.error('Error fetching post details:', error);
@@ -69,9 +45,12 @@ export default function PostDetails() {
         fetchPostDetails();
     }
 
-    async function handleCherishComment(event: React.MouseEvent, commentId: string) {
+    async function handleCherishComment(
+        event: React.MouseEvent,
+        commentId: string
+    ) {
         event.preventDefault;
-        await api.post(`/cherish/comment/${commentId}`);
+        await api.post(`/cherish/comment/${commentId}`, { userId, token });
         fetchPostDetails();
     }
 
@@ -97,12 +76,28 @@ export default function PostDetails() {
     async function handleNewCommentCreate(event: FormEvent) {
         event.preventDefault();
         const content = newComment;
-        await api.post('/create/comment', { content, postId })
+        const response = await api.post('/create/comment', { content, postId, userId });
+        const createdComment = response.data.Comment;
 
+        setPostDetails(prev => {
+            const updatedPost = prev ? { ...prev } : {
+                id: '', // Provide default values for all required fields
+                title: '',
+                content: '',
+                asfCoins: 0,
+                asfCash: 0,
+                createdAt: new Date().toISOString(), // or any default date
+                option: '',
+                comments: [],
+                user: { id: '', name: '' } // Provide a default User structure
+            };
+
+            return {
+                ...updatedPost,
+                comments: [...updatedPost.comments, createdComment],
+            } as Posts; // Ensure to cast to Posts type
+        });
         setNewComment('');
-        fetchPostDetails();
-
-        return true;
     };
     function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
         event.target.setCustomValidity('');
@@ -121,18 +116,38 @@ export default function PostDetails() {
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
         event.preventDefault();
         const newText = newReply[parentCommentId || ''];
-        setNewReply(prevState => ({
-            ...prevState,
-            [parentCommentId || '']: newText
-        }));
-        await api.post('/create/comment/sub', { content: newText, postId, parentCommentId })
+        const response = await api.post('/create/comment/sub', { content: newText, postId, parentCommentId, userId });
+        const createdSubComment = response.data.SubComment;
+
+        setPostDetails(prev => {
+            const updatedPost: Posts = prev ? { ...prev } : {
+                id: '',
+                title: '',
+                content: '',
+                asfCoins: 0,
+                asfCash: 0,
+                createdAt: new Date().toISOString(),
+                option: '',
+                comments: [],
+                user: { id: '', name: '', email: '' }, // Include email here
+            };
+
+            const updatedComments = updatedPost.comments.map(comment => {
+                if (comment.id === parentCommentId) {
+                    return {
+                        ...comment,
+                        replies: [...(comment.replies || []), createdSubComment],
+                    };
+                }
+                return comment;
+            });
+
+            return { ...updatedPost, comments: updatedComments };
+        });
 
         setNewReply(prevState => ({ ...prevState, [parentCommentId || '']: '' }));
-        fetchPostDetails();
         setOpenReplyBoxId(null);
-
-        return true;
-    };
+    }
     function handleNewReplyChange(event: ChangeEvent<HTMLTextAreaElement>, commentId: string) {
         event.target.setCustomValidity('');
         setNewReply(prevState => ({
@@ -167,7 +182,7 @@ export default function PostDetails() {
                             <div>
                                 <p>Matheus Barth</p>
                                 <time>{
-                                    formatDistanceToNow(comment.createAt, {
+                                    formatDistanceToNow(comment.createdAt, {
                                         locale: ptBR,
                                         addSuffix: true,
                                     })
