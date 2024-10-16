@@ -69,7 +69,7 @@ export const Info = styled.div`
     }
 `
 
-export const Titulo = styled.div`
+export const Title = styled.div`
     font-size: 2rem;
 `
 

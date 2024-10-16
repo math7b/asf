@@ -2,9 +2,10 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { verifyToken } from "../token";
+import { postsPubSub } from "../../utils/posts-pub-sub";
 
 export async function createPost(app: FastifyInstance) {
-    app.post('/create/post', async (request, reply) => {
+    app.post('/post', async (request, reply) => {
         const createPost = z.object({
             title: z.string(),
             content: z.string(),
@@ -17,7 +18,7 @@ export async function createPost(app: FastifyInstance) {
         if (!verifyedToken.valid) {
             return reply.status(400).send({ message: "Not authorized" });
         }
-        const post = await prisma.post.create({
+        const postCreated = await prisma.post.create({
             data: {
                 title,
                 content,
@@ -28,8 +29,45 @@ export async function createPost(app: FastifyInstance) {
                         id: userId,
                     }
                 },
-            }
+            },
         })
-        return reply.status(201).send({Post: post})
+        const id = postCreated.id;
+        const post = await prisma.post.findUnique({
+            where: { id: id },
+            select: {
+                id: true,
+                title: true,
+                content: true,
+                asfCoins: true,
+                createdAt: true,
+                option: true,
+                comments: {
+                    select: {
+                        id: true,
+                        content: true,
+                        asfCoins: true,
+                        createdAt: true,
+                        postId: true,
+                        replies: true,
+                        parentCommentId: true,
+                        user: true,
+                    }
+                },
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        registeredAt: true,
+                        beeKeeper: true,
+                    }
+                },
+            }
+        });
+        if (!post) {
+            return reply.status(404).send({ message: "Post not found" });
+        }
+        postsPubSub.publish('asf', { action: 'create', type: 'post', data: post })
+        return reply.status(201).send()
     })
 }

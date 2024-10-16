@@ -6,53 +6,35 @@ import {
     Buttons, Content, CustonInput,
     Option, PostForm, Title
 } from "./styles";
-import { useAuth, UserData } from "../../components/ContextProviders/AuthContext";
+import { useAuth } from "../../components/ContextProviders/AuthContext";
+import { Posts } from "../../interfaces";
 
 export default function PostCreate() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [option, setOption] = useState('');
-    const { isLoggedIn, token, userData, setUserData, logout } = useAuth();
+    const {
+        isLoggedIn,
+        loggedUser,
+        token,
+        logout
+    } = useAuth();
     const navigate = useNavigate();
 
     async function handleNewPostCreate(event: FormEvent) {
         event.preventDefault();
         if (!isLoggedIn || !token) {
+            logout();
             alert(`Fantasmas não podem criar conteudos.`);
             navigate('/login');
             return;
         }
-        try {
-            const userId = userData?.id
-            const response = await api.post('/create/post', { title, content, option, userId, token });
-            console.log({
-                Response: Response
-            })
-            if (!userData) {
-                logout()
-                navigate('/login')
-                return;
-            }
-            const newPost = response.data.Post;
-            const updatedUserData: UserData = {
-                ...userData,
-                posts: [...(userData.posts || null), newPost],
-            };
-
-
-            setUserData(updatedUserData);
-
-            setTitle('');
-            setContent('');
-            setOption('');
-            navigate('/home')
-        } catch (error: any) {
-            if (error.response) {
-                console.error("Error response:", error.response.data);
-                alert(`Erro: ${error.response.data}`);
-                navigate('/login');
-            }
-        }
+        const userId = loggedUser?.id
+        await api.post('/post', { title, content, option, userId, token });
+        setTitle('');
+        setContent('');
+        setOption('');
+        navigate('/home')
     };
 
     const handleNewTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -92,9 +74,7 @@ export default function PostCreate() {
                         required
                     ></textarea>
                 </Content>
-
                 <p>Tipo da postagem</p>
-
                 <Option>
                     <input
                         type="radio"

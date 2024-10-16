@@ -1,21 +1,21 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
-import { connect } from "net";
 import { verifyToken } from "../token";
+import { postsPubSub } from "../../utils/posts-pub-sub";
 
 export async function createSubComment(app: FastifyInstance) {
-    app.post('/create/comment/sub', async (request, reply) => {
+    app.post('/comment/sub', async (request, reply) => {
         const createCommentBody = z.object({
             content: z.string(),
             postId: z.string(),
             parentCommentId: z.string().optional(),
             userId: z.string(),
             token: z.string(),
-        })
-        const { content, postId, parentCommentId, userId, token } = createCommentBody.parse(request.body)
-        const verifyedToken = verifyToken(token);
-        if (!verifyedToken.valid) {
+        });
+        const { content, postId, parentCommentId, userId, token } = createCommentBody.parse(request.body);
+        const verifiedToken = verifyToken(token);
+        if (!verifiedToken.valid) {
             return reply.status(400).send({ message: "Not authorized" });
         }
         const data: any = {
@@ -32,15 +32,44 @@ export async function createSubComment(app: FastifyInstance) {
                 },
             },
         };
-
         if (parentCommentId) {
-            data.parentCommentId = parentCommentId;
+            data.parentComment = {
+                connect: {
+                    id: parentCommentId,
+                },
+            };
         }
-
-        const subComent = await prisma.comment.create({
+        const subCommentCreate = await prisma.comment.create({
             data,
         });
-
-        return reply.status(201).send({ SubComment: subComent })
-    })
+        const id = subCommentCreate.id;
+        const subComment = await prisma.comment.findUnique({
+            where: {
+                id: id,
+            },
+            select: {
+                id: true,
+                content: true,
+                asfCoins: true,
+                createdAt: true,
+                postId: true,
+                replies: true,
+                parentCommentId: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        registeredAt: true,
+                        beeKeeper: true,
+                    }
+                },
+            }
+        })
+        if (!subComment) {
+            return reply.status(404).send({ message: "Sub comment not found" });
+        }
+        postsPubSub.publish('asf', { action: 'create', type: 'comment', data: subComment })
+        return reply.status(201).send();
+    });
 }

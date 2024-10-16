@@ -5,7 +5,7 @@ import { connect } from "http2";
 import { encrypt } from "../encrypt";
 
 export async function createBeeKeeper(app: FastifyInstance) {
-    app.post('/create/beekeeper', async (request, reply) => {
+    app.post('/beekeeper', async (request, reply) => {
         const createUser = z.object({
             state: z.string(),
             city: z.string(),

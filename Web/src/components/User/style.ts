@@ -75,6 +75,7 @@ export const PostInfo = styled.div`
     justify-content: space-between;
     font-size: 0.65625rem;
     margin-bottom: 1rem;
+    color: ${props => props.theme.texts.text_600};
     `;
 
 export const Titulo = styled.div`
@@ -84,6 +85,9 @@ export const Titulo = styled.div`
 
 export const Coins = styled.div`
     font-size: 0.65625rem;
+    p {
+        color: ${props => props.theme.texts.text_600};
+    }
 `;
 
 export const AsfCash = styled.div`

@@ -15,7 +15,8 @@ export function Logon() {
         try {
             const logon = await api.post('/logon', { email, password })
             const response = logon.data;
-            login(response); // Update the context state
+            console.log(response)
+            login(response);
             setEmail('');
             setPassword('');
             navigate('/home');

@@ -8,7 +8,7 @@ export const Container = styled.main`
     align-items: center;
     justify-content: center;
 `
-export const Posts = styled.div`
+export const StyledPosts = styled.div`
 
     display: flex;
     flex-direction: column;

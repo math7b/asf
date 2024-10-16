@@ -6,7 +6,7 @@ interface Comment {
     id: string;
     content: string;
     asfCoins: number;
-    createAt: Date;
+    createdAt: Date;
     postId: string;
     parentCommentId: string | null;
     replies?: Comment[];
@@ -63,7 +63,7 @@ function organizeComments(comments: Comment[]): Comment[] {
         commentMap[comment.id] = comment
     })
 
-    comments.sort((a, b) => new Date(b.createAt).getTime() - new Date(a.createAt).getTime())
+    comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     
     // Organize comments into hierarchical structure
     comments.forEach(comment => {

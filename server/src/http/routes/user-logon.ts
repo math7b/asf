@@ -27,15 +27,17 @@ export async function logon(app: FastifyInstance) {
             },
             select: {
                 id: true,
-                iv: false,
                 name: true,
                 email: true,
                 password: false,
                 asfCoins: true,
                 asfCash: true,
                 registeredAt: true,
-                posts: true,
-                comments: true,
+                posts: {
+                    orderBy: {
+                        createdAt: "desc"
+                    }
+                },
                 beeKeeper: true,
             }
         })

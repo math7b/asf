@@ -1,11 +1,12 @@
 import { FastifyInstance } from "fastify";
-import { z } from "zod";
+import { any, z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { connect } from "http2";
 import { verifyToken } from "../token";
+import { postsPubSub } from "../../utils/posts-pub-sub";
 
 export async function createComment(app: FastifyInstance) {
-    app.post('/create/comment', async (request, reply) => {
+    app.post('/comment', async (request, reply) => {
         const createCommentBody = z.object({
             content: z.string(),
             postId: z.string(),
@@ -14,10 +15,10 @@ export async function createComment(app: FastifyInstance) {
         })
         const { content, postId, userId, token } = createCommentBody.parse(request.body)
         const verifyedToken = verifyToken(token);
-        if (!verifyedToken.valid) {
+        if (verifyedToken.valid == false) {
             return reply.status(400).send({ message: "Not authorized" });
         }
-        const comment = await prisma.comment.create({
+        const commentCreated = await prisma.comment.create({
             data: {
                 content,
                 asfCoins: 2,
@@ -33,6 +34,34 @@ export async function createComment(app: FastifyInstance) {
                 },
             }
         })
-        return reply.status(201).send({Comment: comment})
+        const id = commentCreated.id;
+        const comment = await prisma.comment.findUnique({
+            where: {
+                id: id,
+            },
+            select: {
+                id: true,
+                content: true,
+                asfCoins: true,
+                createdAt: true,
+                postId: true,
+                replies: true,
+                parentCommentId: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        registeredAt: true,
+                        beeKeeper: true,
+                    }
+                },
+            }
+        })
+        if (!comment) {
+            return reply.status(404).send({ message: "Comment not found" });
+        }
+        postsPubSub.publish('asf', { action: 'create', type: 'comment', data: comment })
+        return reply.status(201).send()
     })
 }

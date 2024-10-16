@@ -11,7 +11,8 @@ export async function cherishPost(app: FastifyInstance) {
             token: z.string(),
         })
 
-        const { postId, userId, token } = cherishPostParams.parse(request.params)
+        const { postId } = cherishPostParams.parse(request.params)
+        const { userId, token } = cherishPostParams.parse(request.body)
         const verifyedToken = verifyToken(token);
         if (!verifyedToken.valid) {
             return reply.status(400).send({ message: "Not authorized" });

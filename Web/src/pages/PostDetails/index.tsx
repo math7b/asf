@@ -1,103 +1,127 @@
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale/pt-BR";
-import { CaretDown, CaretUp, Trash } from "phosphor-react";
-import React, {
-    ChangeEvent, FormEvent, InvalidEvent, useEffect, useState
-} from "react";
-import api from "../../services/api";
-import {
-    Content, CreateComment, CreateReplay, Info, Titulo,
-    Votes
-} from "./styles";
-
+import React, { ChangeEvent, FormEvent, InvalidEvent, useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale/pt-BR';
+import { usePosts } from '../../components/ContextProviders/PostContext';
+import { Posts, Comment } from '../../interfaces';
+import { CaretDown, CaretUp, Trash } from 'phosphor-react';
+import api from '../../services/api';
+import { useAuth } from '../../components/ContextProviders/AuthContext';
 import { Container, Post } from "../../styles/global";
-import { useAuth, Comment, Posts } from "../../components/ContextProviders/AuthContext";
+import { Content, CreateComment, CreateReplay, Info, Title, Votes } from './styles';
 
 export default function PostDetails() {
-    const [postDetails, setPostDetails] = useState<Posts>();
-    const [newComment, setNewComment] = useState('')
+    const { isLoggedIn, loggedUser, logout, token } = useAuth();
+    const {
+        loading,
+        error,
+        fetchPostById,
+        cherishPost,
+        cherishComment,
+        depreciateComment,
+        depreciatePost,
+    } = usePosts();
+
+    const [post, setPost,] = useState<Posts | null>(null);
+    const [newComment, setNewComment] = useState<string>('');
     const [newReply, setNewReply] = useState<{ [key: string]: string }>({});
-    const { userData, token } = useAuth();
-    const userId = userData?.id
-
     const [openReplyBoxId, setOpenReplyBoxId] = useState<string | null>(null);
-    const [comments, setComments] = useState<Comment[]>([]);
 
-    const url = window.location.pathname;
-    const postId = url.substring(url.lastIndexOf('/') + 1);
-
+    const { postId } = useParams<{ postId?: string }>();
+    const userId = loggedUser?.id;
+    const navigate = useNavigate();
     useEffect(() => {
-        fetchPostDetails();
-    }, []);
+        const loadPost = async () => {
+            if (postId) {
+                const fetchedPost = await fetchPostById(postId);
+                setPost(fetchedPost);
+            }
+        };
+        loadPost();
+    }, [postId]);
 
-    const fetchPostDetails = async () => {
+    if (loading) return <h1>Loading...</h1>;
+    if (error) return <h1>{error}</h1>;
+    async function handleCherishPost(event: React.MouseEvent) {
+        event.preventDefault();
         try {
-            const response = await api.get<Posts>(`/posts/${postId}`);
-            setPostDetails(response.data);
+            if (postId && userId) {
+                await cherishPost(postId, userId, token);
+            } else {
+                alert("Connectse primeiro");
+                navigate('../../login');
+            }
         } catch (error) {
-            console.error('Error fetching post details:', error);
+            console.error('Error cherishing post:', error);
         }
-    };
-
-    async function handleCherishPost(event: React.MouseEvent, postId: string) {
+    }
+    async function handleCherishComment(event: React.MouseEvent, commentId: string) {
         event.preventDefault;
-        await api.post(`/cherish/post/${postId}`);
-        fetchPostDetails();
+        try {
+            if (userId) {
+                await cherishComment(commentId, userId, token);
+            } else {
+                alert("Connectse primeiro");
+                navigate('../../login');
+            }
+        } catch (error) {
+            console.error('Error cherishing comment:', error);
+        }
     }
 
-    async function handleCherishComment(
-        event: React.MouseEvent,
-        commentId: string
-    ) {
-        event.preventDefault;
-        await api.post(`/cherish/comment/${commentId}`, { userId, token });
-        fetchPostDetails();
+    async function handleDepreciatePost(event: React.MouseEvent) {
+        event.preventDefault();
+        try {
+            if (postId && userId) {
+                await depreciatePost(postId, userId, token);
+            } else {
+                alert("Connectse primeiro");
+                navigate('../../login');
+            }
+        } catch (error) {
+            console.error('Error depreciating post:', error);
+        }
     }
-
-    async function handleDepreciatePost(event: React.MouseEvent, postId: string) {
-        event.preventDefault;
-        await api.post(`/depreciate/post/${postId}`);
-        fetchPostDetails();
-    }
-
     async function handleDepreciateComment(event: React.MouseEvent, commentId: string) {
         event.preventDefault;
-        await api.post(`/depreciate/comment/${commentId}`);
-        fetchPostDetails();
+        try {
+            if (userId) {
+                await depreciateComment(commentId, userId, token);
+            } else {
+                alert("Connectse primeiro");
+                navigate('../../login');
+            }
+        } catch (error) {
+            console.error('Error depreciating comment:', error);
+        }
     }
 
-    async function handlePostDelete(event: React.MouseEvent, postId: string) {
+    async function handlePostDelete(event: React.MouseEvent) {
         event.preventDefault;
-        await api.post(`/delete/post/${postId}`);
-        fetchPostDetails();
-        window.location.href = '/';
+        try {
+            await api.delete(`post/${postId}`, {
+                params: { userId, token }
+            });
+            navigate('../home')
+        } catch (error) {
+            console.error('Error deleting post:', error);
+        }
     };
-
     async function handleNewCommentCreate(event: FormEvent) {
         event.preventDefault();
+        if (!isLoggedIn || !token) {
+            logout();
+            alert(`Fantasmas não podem criar conteudos.`);
+            navigate('/login');
+            return;
+        }
         const content = newComment;
-        const response = await api.post('/create/comment', { content, postId, userId });
-        const createdComment = response.data.Comment;
-
-        setPostDetails(prev => {
-            const updatedPost = prev ? { ...prev } : {
-                id: '', // Provide default values for all required fields
-                title: '',
-                content: '',
-                asfCoins: 0,
-                asfCash: 0,
-                createdAt: new Date().toISOString(), // or any default date
-                option: '',
-                comments: [],
-                user: { id: '', name: '' } // Provide a default User structure
-            };
-
-            return {
-                ...updatedPost,
-                comments: [...updatedPost.comments, createdComment],
-            } as Posts; // Ensure to cast to Posts type
-        });
+        await api.post('/comment', { content, postId, userId, token });
         setNewComment('');
+        if (postId) {
+            const updatedPost = await fetchPostById(postId);
+            setPost(updatedPost); // Update the local state
+        }
     };
     function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
         event.target.setCustomValidity('');
@@ -108,43 +132,33 @@ export default function PostDetails() {
     };
 
     async function handleReplyDelete(event: React.MouseEvent, commentId: string) {
-        event.preventDefault;
-        await api.post(`/delete/comment/${commentId}`);
-        fetchPostDetails();
+        event.preventDefault();
+        try {
+            await api.delete(`/comment/${commentId}`, {
+                params: { userId, token }
+            });
+            if (postId) {
+                const updatedPost = await fetchPostById(postId);
+                setPost(updatedPost);
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
     };
-
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
         event.preventDefault();
-        const newText = newReply[parentCommentId || ''];
-        const response = await api.post('/create/comment/sub', { content: newText, postId, parentCommentId, userId });
-        const createdSubComment = response.data.SubComment;
-
-        setPostDetails(prev => {
-            const updatedPost: Posts = prev ? { ...prev } : {
-                id: '',
-                title: '',
-                content: '',
-                asfCoins: 0,
-                asfCash: 0,
-                createdAt: new Date().toISOString(),
-                option: '',
-                comments: [],
-                user: { id: '', name: '', email: '' }, // Include email here
-            };
-
-            const updatedComments = updatedPost.comments.map(comment => {
-                if (comment.id === parentCommentId) {
-                    return {
-                        ...comment,
-                        replies: [...(comment.replies || []), createdSubComment],
-                    };
-                }
-                return comment;
-            });
-
-            return { ...updatedPost, comments: updatedComments };
-        });
-
+        if (!isLoggedIn || !token) {
+            logout();
+            alert(`Fantasmas não podem criar conteudos.`);
+            navigate('/login');
+            return;
+        }
+        const content = newReply[parentCommentId || ''];
+        await api.post('/comment/sub', { content, postId, parentCommentId, userId, token });
+        if (postId) {
+            const updatedPost = await fetchPostById(postId);
+            setPost(updatedPost);
+        }
         setNewReply(prevState => ({ ...prevState, [parentCommentId || '']: '' }));
         setOpenReplyBoxId(null);
     }
@@ -226,57 +240,53 @@ export default function PostDetails() {
 
     return (
         <Container>
-            {postDetails ? (
-                <>
-                    <Post key={postDetails.id}>
-                        <Votes>
-                            <span onClick={(e) => handleCherishPost(e, postDetails.id)}><CaretUp size={20} /></span>
-                            <p>{postDetails.asfCoins}</p>
-                            <span onClick={(e) => handleDepreciatePost(e, postDetails.id)}>
-                                <CaretDown size={20} />
-                            </span>
-                            <div></div>
-                        </Votes>
+            <>
+                <Post key={post?.id}>
+                    <Votes>
+                        <span onClick={(e) => handleCherishPost(e)}><CaretUp size={20} /></span>
+                        <p>{post?.asfCoins}</p>
+                        <span onClick={(e) => handleDepreciatePost(e)}>
+                            <CaretDown size={20} />
+                        </span>
+                        <div></div>
+                    </Votes>
+                    <Content>
+                        <Info>
+                            <div>
+                                <p>Matheus Barth</p>
+                                <time>{post ?
+                                    formatDistanceToNow(post.createdAt, {
+                                        locale: ptBR,
+                                        addSuffix: true
+                                    }
+                                    ) : 'Date not available'}</time>
+                            </div>
+                            <span onClick={(e) => handlePostDelete(e)}><Trash size={16} /></span>
+                        </Info>
+                        <Title>
+                            {post?.title}
+                        </Title>
                         <Content>
-                            <Info>
-                                <div>
-                                    <p>Matheus Barth</p>
-                                    <time>{
-                                        formatDistanceToNow(postDetails.createdAt, {
-                                            locale: ptBR,
-                                            addSuffix: true,
-                                        })
-                                    }</time>
-                                </div>
-                                <span onClick={(e) => handlePostDelete(e, postDetails.id)}><Trash size={16} /></span>
-                            </Info>
-                            <Titulo>
-                                {postDetails.title}
-                            </Titulo>
-                            <Content>
-                                {postDetails.content}
-                            </Content>
+                            {post?.content}
                         </Content>
-                    </Post>
-                    <CreateComment onSubmit={handleNewCommentCreate}>
-                        <strong>Deixe um comentário</strong>
-                        <textarea
-                            name="comment"
-                            placeholder="Deixe um comentário"
-                            value={newComment}
-                            onChange={handleNewCommentChange}
-                            onInvalid={handleNewCommentInvalid}
-                            required
-                        ></textarea>
-                        <footer>
-                            <button type="submit">Responder</button>
-                        </footer>
-                    </CreateComment>
-                </>
-            ) : (
-                <h1>loading or missing Post.</h1>
-            )}
-            {postDetails?.comments && renderComments(postDetails.comments)}
+                    </Content>
+                </Post>
+                <CreateComment onSubmit={handleNewCommentCreate}>
+                    <strong>Deixe um comentário</strong>
+                    <textarea
+                        name="comment"
+                        placeholder="Deixe um comentário"
+                        value={newComment}
+                        onChange={handleNewCommentChange}
+                        onInvalid={handleNewCommentInvalid}
+                        required
+                    ></textarea>
+                    <footer>
+                        <button type="submit">Responder</button>
+                    </footer>
+                </CreateComment>
+            </>
+            {post?.comments && renderComments(post.comments)}
         </Container>
     );
 }
