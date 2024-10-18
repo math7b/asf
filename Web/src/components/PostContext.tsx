@@ -1,26 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import api from '../../services/api';
-import { Comment, PostMessage, Posts, PostsContextType } from '../../interfaces';
-import { useAuth } from './AuthContext';
+import api from '../services/api';
+import { Comment, PostMessage, Post, PostsContextType } from '../interfaces';
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const {
-        loggedUser,
-        addPostToLoggedUser,
-        deletePostToLoggedUser
-    } = useAuth();
-
-    const [posts, setPosts] = useState<Posts[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [comment, setComment] = useState<Comment[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [post, setPost] = useState<Post | null>(null);
+    const [fetchedPostIds, setFetchedPostIds] = useState<Set<string>>(new Set());
+    console.log({
+        Posts: posts,
+        Post: post,
+        FetchedPostIdsA: fetchedPostIds
+    })
 
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            const response = await api.get<Posts[]>('/posts');
+            const response = await api.get<Post[]>('/posts');
             setPosts(response.data);
         } catch (err) {
             setError('Failed to fetch posts.');
@@ -54,63 +54,108 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         };
     }, []);
 
+    const addCommentRecursively = (
+        comments: Comment[], newComment: Comment, parentId: string
+    ): Comment[] => {
+        return comments.map((comment) => {
+            // If this comment is the parent, add the new reply
+            if (comment.id === parentId) {
+                return {
+                    ...comment,
+                    replies: [...(comment.replies || []), newComment],
+                };
+            }
+            // If the comment has replies, check them recursively
+            else if (comment.replies && comment.replies.length > 0) {
+                return {
+                    ...comment,
+                    replies: addCommentRecursively(comment.replies, newComment, parentId),
+                };
+            }
+            return comment; // Return unchanged comment if no matches found
+        });
+    };
+
     const handleMessage = (message: PostMessage) => {
         switch (message.action) {
             case 'create':
                 if (message.type === 'post') {
-                    const newPost = message.data as Posts;
+                    const newPost = message.data as Post;
                     setPosts((prev) => [newPost, ...prev]);
-                    const post = message.data as Posts;
-                    console.log(post)
-                    addPostToLoggedUser(post)
+                    if (post && post.id === newPost.id) {
+                        setPost({ ...newPost });
+                    }
                 }
                 if (message.type === 'comment') {
-                    const postId = message.data.id;
                     const newComment = message.data as Comment;
+                    const postId = newComment.postId;
                     const parentCommentId = newComment.parentCommentId;
+
+                    console.log('New Comment:', newComment);
+                    console.log('Post ID:', postId);
+                    console.log('Parent Comment ID:', parentCommentId);
+
                     setPosts((prevPosts) =>
                         prevPosts.map((post) => {
                             if (post.id === postId) {
                                 if (parentCommentId) {
-                                    const updatedComments = post.comments.map((comment) => {
-                                        if (comment.id === parentCommentId) {
-                                            return {
-                                                ...comment,
-                                                replies: [...(comment.replies || []), newComment]
-                                            };
-                                        }
-                                        return comment;
-                                    });
-                                    return { ...post, comments: updatedComments };
+                                    return {
+                                        ...post,
+                                        comments: addCommentRecursively(post.comments || [], newComment, parentCommentId),
+                                    };
                                 } else {
                                     return {
                                         ...post,
-                                        comments: [...(post.comments || []), newComment]
+                                        comments: [...(post.comments || []), newComment],
                                     };
                                 }
                             }
                             return post;
                         })
                     );
+
+                    setPost((prevPost) => {
+                        if (prevPost) {
+                            const updatedComments = parentCommentId
+                                ? addCommentRecursively(prevPost.comments || [], newComment, parentCommentId)
+                                : [...(prevPost.comments || []), newComment];
+
+                            return { ...prevPost, comments: updatedComments };
+                        }
+                        return null;
+                    });
                 }
                 break;
             case 'delete':
                 if (message.type === 'post') {
                     setPosts((prev) => prev.filter((post) => post.id !== message.data.id));
-                    const postId = message.data.id as string;
-                    const userId = message.data.userId as string;
-                    console.log({
-                        A: postId,
-                        B: userId
-                    })
-                    deletePostToLoggedUser(postId, userId)
                 }
                 if (message.type === 'comment') {
                     const commentId = message.data.id;
+                    if (!commentId) {
+                        return
+                    }
                     setPosts((prevPosts) => prevPosts.map((post) => ({
                         ...post,
-                        comments: post.comments.filter(comment => comment.id !== commentId)
+                        comments: post.comments ?
+                            post.comments.filter(
+                                comment => comment.id !== commentId
+                            ) : []
                     })));
+
+                    setPost((prevPost) => {
+                        if (!prevPost) return null;
+                        const removeCommentRecursively = (comments: Comment[], commentId: string): Comment[] => {
+                            return comments
+                                .filter(comment => comment.id !== commentId)
+                                .map(comment => ({
+                                    ...comment,
+                                    replies: removeCommentRecursively(comment.replies || [], commentId),
+                                }));
+                        };
+                        const updatedComments = removeCommentRecursively(prevPost.comments || [], commentId);
+                        return { ...prevPost, comments: updatedComments };
+                    });
                 }
                 break;
             default:
@@ -121,9 +166,25 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const fetchPostById = async (postId: string) => {
         setLoading(true);
+        if (fetchedPostIds.has(postId)) {
+
+            console.log({ FetchedPostIds: fetchedPostIds })
+
+            const existingPost = posts.find(post => post.id === postId);
+            if (existingPost) {
+                setPost(existingPost);
+                setLoading(false);
+                console.log({ A: post, B: posts })
+            }
+            return null;
+        }
         try {
-            const response = await api.get<Posts>(`/posts/${postId}`);
+            const response = await api.get<Post>(`/posts/${postId}`);
             const fetchedPost = response.data;
+            setPost(fetchedPost);
+
+            console.log({ fetchedPost: fetchedPost })
+
             setPosts(prevPosts => {
                 const existingPostIndex = prevPosts.findIndex(post => post.id === postId);
                 if (existingPostIndex !== -1) {
@@ -134,6 +195,7 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     return [];
                 }
             });
+            setFetchedPostIds(prevIds => new Set(prevIds).add(postId));
             return fetchedPost;
         } catch (err) {
             console.error('Failed to fetch post by ID:', err);
@@ -211,6 +273,7 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return (
         <PostsContext.Provider value={{
             posts,
+            post,
             loading,
             error,
             fetchPosts,

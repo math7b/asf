@@ -1,11 +1,3 @@
-export interface BeeKeeper {
-    id: string;
-    state: string;
-    city: string;
-    phoneNumber: string;
-    RG: string;
-}
-
 export interface Comment {
     id: string;
     content: string;
@@ -14,18 +6,36 @@ export interface Comment {
     postId: string;
     replies?: Comment[];
     parentCommentId?: string;
-    user: UserData;
+    user: UsersData;
 }
 
-export interface Posts {
+export interface Post {
     id: string;
     title: string;
     content: string;
     asfCoins: number;
     createdAt: string;
+    postId: string;
     option: string;
     comments: Comment[];
-    user: UserData;
+    user: UsersData;
+}
+
+export interface BeeKeeper {
+    id: string;
+    state: string;
+    city: string;
+    phoneNumber: string;
+    RG: string;
+}
+
+export interface UsersData {
+    id: string;
+    name: string;
+    email: string;
+    registeredAt: string;
+    posts?: Post[];
+    beeKeeper: BeeKeeper;
 }
 
 export interface LoggedUser {
@@ -35,36 +45,23 @@ export interface LoggedUser {
     asfCash: number;
     asfCoins: number;
     registeredAt: string;
-    posts: Posts[] | [];
     beeKeeper: BeeKeeper;
+    posts: Post[];
+    comments: Comment
 }
 
-export interface UserData {
-    id: string;
-    name: string;
-    email: string;
-    registeredAt: string;
-    posts?: Posts[];
-    beeKeeper: BeeKeeper;
-}
-
-export interface AuthContextType {
-    isLoggedIn: boolean;
-    loggedUser: LoggedUser | null;
-    setLoggedUser: (data: LoggedUser | null) => void;
-    login: (data: { Data: any; Token: string }) => void;
-    logout: () => void;
-    token: string;
-    addPostToLoggedUser: (newPost: Posts) => void;
-    deletePostToLoggedUser: (postId: string, userId: string) => void;
+export interface LoggonApi {
+    Data: LoggedUser,
+    Token: string
 }
 
 export interface PostsContextType {
-    posts: Posts[];
+    posts: Post[];
+    post: Post | null;
     loading: boolean;
     error: string | null;
     fetchPosts: () => Promise<void>;
-    fetchPostById: (postId: string) => Promise<Posts | null>;
+    fetchPostById: (postId: string) => Promise<Post | null>;
     cherishPost: (postId: string, userId: string, token: string) => Promise<void>;
     cherishComment: (commentId: string, userId: string, token: string) => Promise<void>;
     depreciatePost: (postId: string, userId: string, token: string) => Promise<void>;
@@ -72,19 +69,19 @@ export interface PostsContextType {
 }
 
 export interface PostsState {
-    posts: Posts[];
+    posts: Post[];
     loading: boolean;
     error: string | null;
 }
 
-export type PostMessage = {
+export interface PostMessage {
     action: 'create' | 'delete';
     type: 'post' | 'comment' | 'id';
     data: {
-        post?: Posts,
+        post?: Post,
         comment?: Comment,
         id?: string,
         userId?: string,
-        user?: UserData
+        user?: UsersData
     };
 };

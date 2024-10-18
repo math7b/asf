@@ -1,22 +1,22 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Container } from "./styles";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../ContextProviders/AuthContext";
+import { LoggonApi } from "../../interfaces";
 
 export function Logon() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useAuth();
     const navigate = useNavigate();
 
     async function Logon(event: FormEvent) {
         event.preventDefault();
         try {
-            const logon = await api.post('/logon', { email, password })
-            const response = logon.data;
-            console.log(response)
-            login(response);
+            const response = await api.post<LoggonApi>('/logon', { email, password })
+            localStorage.setItem("Data", JSON.stringify(response.data.Data))
+            localStorage.setItem("Token", JSON.stringify(response.data.Token))
+            localStorage.setItem("LoggedStatus", "true")
+            localStorage.setItem("LoggedUserId", JSON.stringify(response.data.Data.id))
             setEmail('');
             setPassword('');
             navigate('/home');

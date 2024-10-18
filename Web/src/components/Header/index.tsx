@@ -1,13 +1,11 @@
 // Header.tsx
 import { Link } from 'react-router-dom';
 import { Plus } from 'phosphor-react';
-import { useAuth } from '../ContextProviders/AuthContext'; // Adjust the import path
 import logoLight from '../../assets/logo-light.png';
 import { HeaderContainer } from './styles';
 
 export function Header() {
-    const { isLoggedIn, logout } = useAuth();
-
+    const isLoggedIn = localStorage.getItem("LoggedStatus");
     return (
         <HeaderContainer>
             <Link to={"/home"}>
@@ -19,7 +17,7 @@ export function Header() {
                         <Link to={"/posts/create"}>
                             <Plus size={34} />
                         </Link>
-                        <a href="#" onClick={logout}>
+                        <a href="#" onClick={() => { localStorage.clear() }}>
                             <h4>Sair</h4>
                         </a>
                     </>

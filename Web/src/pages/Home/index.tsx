@@ -1,22 +1,29 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-    Container, Content, Info, Post, StyledPosts, Title
+    Container, Content, Info, StyledPost, StyledPosts, Title
 } from "./styles";
-import { Posts } from "../../interfaces";
-import { usePosts } from "../../components/ContextProviders/PostContext";
+import { Post } from "../../interfaces";
+import { usePosts } from "../../components/PostContext";
+import { useEffect } from "react";
 
 export default function Home() {
     const { posts, loading, error } = usePosts();
+
+    useEffect(() => {
+        if (error) {
+            console.log("Error loading post details.");
+            alert("Error loading post details.");
+        }
+    }, [error]);
     if (loading) return <p>Loading posts...</p>;
-    if (error) return <p>Error loading posts: {error}</p>;
+
     return (
         <Container>
             <StyledPosts>
-                {posts.map((post: Posts) => (
-                    <Post key={post.id}>
+                {posts.map((post: Post) => (
+                    <StyledPost key={post.id}>
                         <Link to={`../posts/${post.id}`}>
                             <div>
                                 <Content>
@@ -44,7 +51,7 @@ export default function Home() {
                                 />
                             </div>
                         </Link>
-                    </Post>
+                    </StyledPost>
                 ))}
             </StyledPosts>
         </Container>

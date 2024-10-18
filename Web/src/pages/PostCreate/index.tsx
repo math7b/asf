@@ -6,35 +6,42 @@ import {
     Buttons, Content, CustonInput,
     Option, PostForm, Title
 } from "./styles";
-import { useAuth } from "../../components/ContextProviders/AuthContext";
-import { Posts } from "../../interfaces";
+import { LoggedUser } from "../../interfaces";
 
 export default function PostCreate() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [option, setOption] = useState('');
-    const {
-        isLoggedIn,
-        loggedUser,
-        token,
-        logout
-    } = useAuth();
     const navigate = useNavigate();
+
+    const isLoggedIN = localStorage.getItem("LoggedStatus");
+    const token = JSON.parse(localStorage.getItem("Token") || "null");
+    const loggedUser = JSON.parse(localStorage.getItem("Data") || "null");
 
     async function handleNewPostCreate(event: FormEvent) {
         event.preventDefault();
-        if (!isLoggedIn || !token) {
-            logout();
+        if (!isLoggedIN || !token) {
+            localStorage.clear();
             alert(`Fantasmas não podem criar conteudos.`);
             navigate('/login');
             return;
         }
         const userId = loggedUser?.id
-        await api.post('/post', { title, content, option, userId, token });
-        setTitle('');
-        setContent('');
-        setOption('');
-        navigate('/home')
+        try {
+            await api.post('/post', { title, content, option, userId, token });
+            setTitle('');
+            setContent('');
+            setOption('');
+            navigate('/home');
+        } catch (error) {
+            console.log("Error creating the post.", {
+                Title: title,
+                Content: content,
+                Option: option,
+                UserId: userId,
+                Token: token
+            }, error);
+        }
     };
 
     const handleNewTitleChange = (event: ChangeEvent<HTMLInputElement>) => {

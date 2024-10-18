@@ -2,46 +2,51 @@ import React, { ChangeEvent, FormEvent, InvalidEvent, useEffect, useState } from
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
-import { usePosts } from '../../components/ContextProviders/PostContext';
-import { Posts, Comment } from '../../interfaces';
+import { usePosts } from '../../components/PostContext';
+import { Post, Comment } from '../../interfaces';
 import { CaretDown, CaretUp, Trash } from 'phosphor-react';
 import api from '../../services/api';
-import { useAuth } from '../../components/ContextProviders/AuthContext';
-import { Container, Post } from "../../styles/global";
+import { Container, StyledPost } from "../../styles/global";
 import { Content, CreateComment, CreateReplay, Info, Title, Votes } from './styles';
 
 export default function PostDetails() {
-    const { isLoggedIn, loggedUser, logout, token } = useAuth();
+    const userId = JSON.parse(localStorage.getItem("LoggedUserId") || "null");
+    const isLoggedIn = localStorage.getItem("LoggedStatus");
+    const token = JSON.parse(localStorage.getItem("Token") || "null");
     const {
-        loading,
-        error,
-        fetchPostById,
-        cherishPost,
-        cherishComment,
-        depreciateComment,
-        depreciatePost,
+        post, loading, error, fetchPostById, cherishPost, cherishComment, depreciateComment, depreciatePost,
     } = usePosts();
 
-    const [post, setPost,] = useState<Posts | null>(null);
+    // const [post, setPost,] = useState<Post | null>(null);
     const [newComment, setNewComment] = useState<string>('');
     const [newReply, setNewReply] = useState<{ [key: string]: string }>({});
     const [openReplyBoxId, setOpenReplyBoxId] = useState<string | null>(null);
 
     const { postId } = useParams<{ postId?: string }>();
-    const userId = loggedUser?.id;
     const navigate = useNavigate();
+
+console.log({Post: post})
+
     useEffect(() => {
         const loadPost = async () => {
             if (postId) {
-                const fetchedPost = await fetchPostById(postId);
-                setPost(fetchedPost);
+                await fetchPostById(postId);
+                // const fetchedPost = 
+                // setPost(fetchedPost);
             }
         };
         loadPost();
     }, [postId]);
 
+    useEffect(() => {
+        if (error) {
+            console.log("Error loading post details.");
+            alert("Error loading post details.");
+        }
+    }, [error]);
     if (loading) return <h1>Loading...</h1>;
-    if (error) return <h1>{error}</h1>;
+
+
     async function handleCherishPost(event: React.MouseEvent) {
         event.preventDefault();
         try {
@@ -107,10 +112,11 @@ export default function PostDetails() {
             console.error('Error deleting post:', error);
         }
     };
+
     async function handleNewCommentCreate(event: FormEvent) {
         event.preventDefault();
         if (!isLoggedIn || !token) {
-            logout();
+            localStorage.clear();
             alert(`Fantasmas não podem criar conteudos.`);
             navigate('/login');
             return;
@@ -118,10 +124,11 @@ export default function PostDetails() {
         const content = newComment;
         await api.post('/comment', { content, postId, userId, token });
         setNewComment('');
-        if (postId) {
-            const updatedPost = await fetchPostById(postId);
-            setPost(updatedPost); // Update the local state
-        }
+//         if (postId) {
+//             const updatedPost = await fetchPostById(postId);
+// // console.log({Create: updatedPost}); // Log the updated post
+//             setPost(updatedPost);
+//         }
     };
     function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
         event.target.setCustomValidity('');
@@ -131,16 +138,17 @@ export default function PostDetails() {
         event.target.setCustomValidity('Esse campo é obrigatório');
     };
 
-    async function handleReplyDelete(event: React.MouseEvent, commentId: string) {
+    async function handleCommentDelete(event: React.MouseEvent, commentId: string) {
         event.preventDefault();
         try {
             await api.delete(`/comment/${commentId}`, {
                 params: { userId, token }
             });
-            if (postId) {
-                const updatedPost = await fetchPostById(postId);
-                setPost(updatedPost);
-            }
+//             if (postId) {
+//                 const updatedPost = await fetchPostById(postId);
+// // console.log({Delete: updatedPost}); // Log the updated post
+//                 setPost(updatedPost);
+//             }
         } catch (error) {
             console.error('Error deleting comment:', error);
         }
@@ -148,17 +156,17 @@ export default function PostDetails() {
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
         event.preventDefault();
         if (!isLoggedIn || !token) {
-            logout();
+            localStorage.clear();
             alert(`Fantasmas não podem criar conteudos.`);
             navigate('/login');
             return;
         }
         const content = newReply[parentCommentId || ''];
         await api.post('/comment/sub', { content, postId, parentCommentId, userId, token });
-        if (postId) {
-            const updatedPost = await fetchPostById(postId);
-            setPost(updatedPost);
-        }
+        // if (postId) {
+        //     const updatedPost = await fetchPostById(postId);
+        //     setPost(updatedPost);
+        // }
         setNewReply(prevState => ({ ...prevState, [parentCommentId || '']: '' }));
         setOpenReplyBoxId(null);
     }
@@ -180,7 +188,7 @@ export default function PostDetails() {
     const renderComments = (comments: Comment[]) => {
         return (
             comments.map(comment => (
-                <Post key={comment.id}>
+                <StyledPost key={comment.id}>
                     <Votes>
                         <span onClick={(e) => handleCherishComment(e, comment.id)}>
                             <CaretUp size={20} />
@@ -202,7 +210,7 @@ export default function PostDetails() {
                                     })
                                 }</time>
                             </div>
-                            <span onClick={(e) => handleReplyDelete(e, comment.id)}>
+                            <span onClick={(e) => handleCommentDelete(e, comment.id)}>
                                 <Trash size={16} />
                             </span>
                         </Info>
@@ -233,7 +241,7 @@ export default function PostDetails() {
                         </CreateReplay>
                         {comment.replies && comment.replies.length > 0 && renderComments(comment.replies)}
                     </Content>
-                </Post>
+                </StyledPost>
             ))
         );
     };
@@ -241,7 +249,7 @@ export default function PostDetails() {
     return (
         <Container>
             <>
-                <Post key={post?.id}>
+                <StyledPost key={post?.id}>
                     <Votes>
                         <span onClick={(e) => handleCherishPost(e)}><CaretUp size={20} /></span>
                         <p>{post?.asfCoins}</p>
@@ -270,7 +278,7 @@ export default function PostDetails() {
                             {post?.content}
                         </Content>
                     </Content>
-                </Post>
+                </StyledPost>
                 <CreateComment onSubmit={handleNewCommentCreate}>
                     <strong>Deixe um comentário</strong>
                     <textarea

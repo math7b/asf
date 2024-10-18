@@ -33,12 +33,20 @@ export async function logon(app: FastifyInstance) {
                 asfCoins: true,
                 asfCash: true,
                 registeredAt: true,
+                beeKeeper: true,
                 posts: {
                     orderBy: {
-                        createdAt: "desc"
+                        createdAt: "desc",
                     }
                 },
-                beeKeeper: true,
+                comments: {
+                    where: {
+                        userId: user.id,
+                    },
+                    orderBy: {
+                        createdAt: "desc",
+                    }
+                }
             }
         })
         if (!data) {

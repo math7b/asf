@@ -67,7 +67,7 @@ export const Container = styled.main`
     border-radius: 4px 4px 0px 0px;
 `
 
-export const Post = styled.div`
+export const StyledPost = styled.div`
     display: flex;
     flex: content;
     width: 100%;

@@ -22,12 +22,22 @@ export async function deleteComment(app: FastifyInstance) {
         if (!commentId) {
             return reply.status(404).send({ message: "Error deleting the comment" });
         }
-        await prisma.comment.deleteMany({
-            where: {
-                parentCommentId: commentId,
-                userId: userId,
-            },
-        })
+        const deleteReplies = async (id: string) => {
+            const replies = await prisma.comment.findMany({
+                where: { parentCommentId: id },
+                select: { id: true },
+            });
+            for (const reply of replies) {
+                await deleteReplies(reply.id);
+            }
+            await prisma.comment.deleteMany({
+                where: {
+                    parentCommentId: id,
+                    userId: userId,
+                },
+            });
+        };
+        await deleteReplies(commentId);
         await prisma.comment.delete({
             where: {
                 id: commentId,

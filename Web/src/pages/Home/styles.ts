@@ -16,7 +16,7 @@ export const StyledPosts = styled.div`
     width: 100%;
 `
 
-export const Post = styled.div`
+export const StyledPost = styled.div`
     width: 40%;
     img {
         width: 100%;

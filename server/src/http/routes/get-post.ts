@@ -63,7 +63,7 @@ function organizeComments(comments: Comment[]): Comment[] {
         commentMap[comment.id] = comment
     })
 
-    comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    comments.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     
     // Organize comments into hierarchical structure
     comments.forEach(comment => {
