@@ -3,7 +3,7 @@ import { any, z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { connect } from "http2";
 import { verifyToken } from "../token";
-import { postsPubSub } from "../../utils/posts-pub-sub";
+import { Message, pubSub } from "../../utils/pub-sub";
 
 export async function createComment(app: FastifyInstance) {
     app.post('/comment', async (request, reply) => {
@@ -61,7 +61,7 @@ export async function createComment(app: FastifyInstance) {
         if (!comment) {
             return reply.status(404).send({ message: "Comment not found" });
         }
-        postsPubSub.publish('asf', { action: 'create', type: 'comment', data: comment })
+        pubSub.publish('asf', { action: 'create', type: 'comment', data: { comment } })
         return reply.status(201).send()
     })
 }

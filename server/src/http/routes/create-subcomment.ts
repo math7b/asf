@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { verifyToken } from "../token";
-import { postsPubSub } from "../../utils/posts-pub-sub";
+import { pubSub } from "../../utils/pub-sub";
 
 export async function createSubComment(app: FastifyInstance) {
     app.post('/comment/sub', async (request, reply) => {
@@ -43,7 +43,7 @@ export async function createSubComment(app: FastifyInstance) {
             data,
         });
         const id = subCommentCreate.id;
-        const subComment = await prisma.comment.findUnique({
+        const comment = await prisma.comment.findUnique({
             where: {
                 id: id,
             },
@@ -53,7 +53,18 @@ export async function createSubComment(app: FastifyInstance) {
                 asfCoins: true,
                 createdAt: true,
                 postId: true,
-                replies: true,
+                replies: {
+                    select: {
+                        id: true,
+                        content: true,
+                        asfCoins: true,
+                        createdAt: true,
+                        postId: true,
+                        replies: true,
+                        parentCommentId: true,
+                        user: true,
+                    }
+                },
                 parentCommentId: true,
                 user: {
                     select: {
@@ -63,13 +74,13 @@ export async function createSubComment(app: FastifyInstance) {
                         registeredAt: true,
                         beeKeeper: true,
                     }
-                },
+                },  
             }
         })
-        if (!subComment) {
+        if (!comment) {
             return reply.status(404).send({ message: "Sub comment not found" });
         }
-        postsPubSub.publish('asf', { action: 'create', type: 'comment', data: subComment })
+        pubSub.publish('asf', { action: 'create', type: 'comment', data: { comment } })
         return reply.status(201).send();
     });
 }

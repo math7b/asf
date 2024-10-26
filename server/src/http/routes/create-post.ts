@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { verifyToken } from "../token";
-import { postsPubSub } from "../../utils/posts-pub-sub";
+import { Message, pubSub } from "../../utils/pub-sub";
 
 export async function createPost(app: FastifyInstance) {
     app.post('/post', async (request, reply) => {
@@ -33,7 +33,9 @@ export async function createPost(app: FastifyInstance) {
         })
         const id = postCreated.id;
         const post = await prisma.post.findUnique({
-            where: { id: id },
+            where: {
+                id: id
+            },
             select: {
                 id: true,
                 title: true,
@@ -41,18 +43,7 @@ export async function createPost(app: FastifyInstance) {
                 asfCoins: true,
                 createdAt: true,
                 option: true,
-                comments: {
-                    select: {
-                        id: true,
-                        content: true,
-                        asfCoins: true,
-                        createdAt: true,
-                        postId: true,
-                        replies: true,
-                        parentCommentId: true,
-                        user: true,
-                    }
-                },
+                comments: true,
                 user: {
                     select: {
                         id: true,
@@ -67,7 +58,7 @@ export async function createPost(app: FastifyInstance) {
         if (!post) {
             return reply.status(404).send({ message: "Post not found" });
         }
-        postsPubSub.publish('asf', { action: 'create', type: 'post', data: post })
+        pubSub.publish('asf', { action: 'create', type: 'post', data: { post } })
         return reply.status(201).send()
     })
 }

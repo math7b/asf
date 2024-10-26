@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { verifyToken } from "../token";
-import { postsPubSub } from "../../utils/posts-pub-sub";
+import { pubSub } from "../../utils/pub-sub";
 
 export async function deleteComment(app: FastifyInstance) {
     app.delete('/comment/:commentId', async (request, reply) => {
@@ -44,7 +44,7 @@ export async function deleteComment(app: FastifyInstance) {
                 userId: userId,
             },
         })
-        postsPubSub.publish('asf', { action: 'delete', type: 'comment', data: { id: commentId, userId } })
+        pubSub.publish('asf', { action: 'delete', type: 'comment', data: { commentId, userId } })
         return reply.status(201).send()
     })
 }

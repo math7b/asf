@@ -6,7 +6,6 @@ const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [comment, setComment] = useState<Comment[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [post, setPost] = useState<Post | null>(null);
@@ -80,21 +79,16 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         switch (message.action) {
             case 'create':
                 if (message.type === 'post') {
-                    const newPost = message.data as Post;
+                    const newPost = message.data.post as Post;
                     setPosts((prev) => [newPost, ...prev]);
                     if (post && post.id === newPost.id) {
                         setPost({ ...newPost });
                     }
                 }
                 if (message.type === 'comment') {
-                    const newComment = message.data as Comment;
+                    const newComment = message.data.comment as Comment;
                     const postId = newComment.postId;
                     const parentCommentId = newComment.parentCommentId;
-
-                    console.log('New Comment:', newComment);
-                    console.log('Post ID:', postId);
-                    console.log('Parent Comment ID:', parentCommentId);
-
                     setPosts((prevPosts) =>
                         prevPosts.map((post) => {
                             if (post.id === postId) {
@@ -113,12 +107,11 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             return post;
                         })
                     );
-
                     setPost((prevPost) => {
                         if (prevPost) {
-                            const updatedComments = parentCommentId
-                                ? addCommentRecursively(prevPost.comments || [], newComment, parentCommentId)
-                                : [...(prevPost.comments || []), newComment];
+                            const updatedComments = parentCommentId ?
+                                addCommentRecursively(prevPost.comments || [], newComment, parentCommentId) :
+                                [...(prevPost.comments || []), newComment];
 
                             return { ...prevPost, comments: updatedComments };
                         }
@@ -128,10 +121,10 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 break;
             case 'delete':
                 if (message.type === 'post') {
-                    setPosts((prev) => prev.filter((post) => post.id !== message.data.id));
+                    setPosts((prev) => prev.filter((post) => post.id !== message.data.postId));
                 }
                 if (message.type === 'comment') {
-                    const commentId = message.data.id;
+                    const commentId = message.data.commentId;
                     if (!commentId) {
                         return
                     }
@@ -142,7 +135,6 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                                 comment => comment.id !== commentId
                             ) : []
                     })));
-
                     setPost((prevPost) => {
                         if (!prevPost) return null;
                         const removeCommentRecursively = (comments: Comment[], commentId: string): Comment[] => {
@@ -158,6 +150,82 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     });
                 }
                 break;
+            case 'cherish':
+                if (message.type === 'post') {
+                    const postId = message.data.postId;
+                    setPosts((prevPosts) =>
+                        prevPosts.map((post) =>
+                            post.id === postId ? { ...post, asfCoins: post.asfCoins + 1 } : post
+                        )
+                    );
+                    setPost((prevPost) => {
+                        if (prevPost && prevPost.id === postId) {
+                            return { ...prevPost, asfCoins: prevPost.asfCoins + 1 };
+                        }
+                        return prevPost;
+                    });
+                }
+                if (message.type === 'comment') {
+                    const commentId = message.data.commentId;
+                    setPosts((prevPosts) =>
+                        prevPosts.map((post) => ({
+                            ...post,
+                            comments: post.comments ? post.comments.map((comment) =>
+                                comment.id === commentId ?
+                                    { ...comment, asfCoins: comment.asfCoins + 1 } :
+                                    comment
+                            ) : [],
+                        }))
+                    );
+                    setPost((prevPost) => {
+                        if (prevPost) {
+                            const updatedComments = prevPost.comments.map((comment) =>
+                                comment.id === commentId ?
+                                    { ...comment, asfCoins: comment.asfCoins + 1 } :
+                                    comment
+                            );
+                            return { ...prevPost, comments: updatedComments };
+                        }
+                        return prevPost;
+                    });
+                }
+                break;
+            case 'depreciate':
+                if (message.type === 'post') {
+                    const postId = message.data.postId;
+                    setPosts((prevPosts) =>
+                        prevPosts.map((post) =>
+                            post.id === postId ? { ...post, asfCoins: post.asfCoins - 1 } : post
+                        )
+                    );
+                    setPost((prevPost) => {
+                        if (prevPost && prevPost.id === postId) {
+                            return { ...prevPost, asfCoins: prevPost.asfCoins - 1 };
+                        }
+                        return prevPost;
+                    });
+                }
+                if (message.type === 'comment') {
+                    const commentId = message.data.commentId;
+                    setPosts((prevPosts) =>
+                        prevPosts.map((post) => ({
+                            ...post,
+                            comments: post.comments ? post.comments.map((comment) =>
+                                comment.id === commentId ? { ...comment, asfCoins: comment.asfCoins - 1 } : comment
+                            ) : [],
+                        }))
+                    );
+                    setPost((prevPost) => {
+                        if (prevPost) {
+                            const updatedComments = prevPost.comments.map((comment) =>
+                                comment.id === commentId ? { ...comment, asfCoins: comment.asfCoins - 1 } : comment
+                            );
+                            return { ...prevPost, comments: updatedComments };
+                        }
+                        return prevPost;
+                    });
+                }
+                break;
             default:
                 console.warn('Unknown action type:', message.action);
                 break;
@@ -167,14 +235,10 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const fetchPostById = async (postId: string) => {
         setLoading(true);
         if (fetchedPostIds.has(postId)) {
-
-            console.log({ FetchedPostIds: fetchedPostIds })
-
             const existingPost = posts.find(post => post.id === postId);
             if (existingPost) {
                 setPost(existingPost);
                 setLoading(false);
-                console.log({ A: post, B: posts })
             }
             return null;
         }
@@ -182,9 +246,6 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const response = await api.get<Post>(`/posts/${postId}`);
             const fetchedPost = response.data;
             setPost(fetchedPost);
-
-            console.log({ fetchedPost: fetchedPost })
-
             setPosts(prevPosts => {
                 const existingPostIndex = prevPosts.findIndex(post => post.id === postId);
                 if (existingPostIndex !== -1) {
@@ -206,66 +267,6 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     };
 
-    const cherishPost = async (postId: string, userId: string, token: string) => {
-        try {
-            await api.post(`/cherish/post/${postId}`, { userId, token });
-
-            setPosts(prevPosts =>
-                prevPosts.map(post =>
-                    post.id === postId ? { ...post, asfCoins: post.asfCoins + 1 } : post
-                )
-            );
-        } catch (err) {
-            console.error('Error cherishing post:', err);
-            setError('Failed to cherish post.');
-        }
-    };
-
-    const cherishComment = async (commentId: string, userId: string, token: string) => {
-        try {
-            await api.post(`/cherish/comment/${commentId}`, { userId, token });
-
-            setComment(prevPosts =>
-                prevPosts.map(comment =>
-                    comment.id === commentId ? { ...comment, asfCoins: comment.asfCoins + 1 } : comment
-                )
-            );
-        } catch (err) {
-            console.error('Error cherishing post:', err);
-            setError('Failed to cherish post.');
-        }
-    };
-
-    const depreciatePost = async (postId: string, userId: string, token: string) => {
-        try {
-            await api.post(`/depreciate/post/${postId}`, { userId, token });
-
-            setPosts(prevPosts =>
-                prevPosts.map(post =>
-                    post.id === postId ? { ...post, asfCoins: post.asfCoins - 1 } : post
-                )
-            );
-        } catch (err) {
-            console.error('Error depreciating post:', err);
-            setError('Failed to depreciate post.');
-        }
-    };
-
-    const depreciateComment = async (commentId: string, userId: string, token: string) => {
-        try {
-            await api.post(`/depreciate/comment/${commentId}`, { userId, token });
-
-            setComment(prevPosts =>
-                prevPosts.map(comment =>
-                    comment.id === commentId ? { ...comment, asfCoins: comment.asfCoins - 1 } : comment
-                )
-            );
-        } catch (err) {
-            console.error('Error depreciating post:', err);
-            setError('Failed to depreciate post.');
-        }
-    };
-
     useEffect(() => {
         fetchPosts();
     }, []);
@@ -278,10 +279,6 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             error,
             fetchPosts,
             fetchPostById,
-            cherishPost,
-            cherishComment,
-            depreciatePost,
-            depreciateComment
         }}>
             {children}
         </PostsContext.Provider>

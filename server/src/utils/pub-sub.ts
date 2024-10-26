@@ -1,54 +1,60 @@
-type BeeKeeper = {
+import { date, number } from "zod";
+
+export type BeeKeeper = {
     id: string;
     state: string;
     city: string;
     phoneNumber: string;
     RG: string;
+    CPF: string;
+    subscriptionAt: Date;
+    userId: string;
 };
 
-type User = {
+export type User = {
     id: string;
     name: string;
     email: string;
-    registeredAt: string;
-    beeKeeper: BeeKeeper;
+    registeredAt: Date;
+    beeKeeper?: BeeKeeper | null;
 };
 
-type Comment = {
+export type Comment = {
     id: string;
     content: string;
     asfCoins: number;
-    createdAt: string;
+    createdAt: Date;
     postId: string;
     replies?: Comment[];
-    parentCommentId?: string;
+    parentCommentId?: string | null;
     user: User;
 }
 
-type Post = {
+export type Post = {
     id: string;
     title: string;
     content: string;
     asfCoins: number;
-    createdAt: string;
+    createdAt: Date;
     option: string;
     comments?: Comment[];
     user: User;
 };
 
-export type PostMessage = {
-    action: 'create' | 'delete';
+export type Message = {
+    action: 'create' | 'delete' | 'cherish' | 'depreciate';
     type: 'post' | 'comment';
     data: {
-        post?: Post,
-        comment?: Comment,
-        id?: string,
+        post?: {},
+        comment?: {},
+        postId?: string,
+        commentId?: string,
         userId?: string
     };
 };
-export type Subscriber = (message: PostMessage) => void;
+export type Subscriber = (message: Message) => void;
 
-class PostsPubSub {
+class PubSub {
     private channels: Record<string, Subscriber[]> = {};
 
     subscribe(channel: string, subscriber: Subscriber) {
@@ -58,7 +64,7 @@ class PostsPubSub {
         this.channels[channel].push(subscriber);
     }
 
-    publish(channel: string, message: PostMessage) {
+    publish(channel: string, message: Message) {
         if (!this.channels[channel]) {
             return;
         }
@@ -68,4 +74,4 @@ class PostsPubSub {
     }
 }
 
-export const postsPubSub = new PostsPubSub();
+export const pubSub = new PubSub();

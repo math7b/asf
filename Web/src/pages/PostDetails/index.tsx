@@ -14,10 +14,8 @@ export default function PostDetails() {
     const isLoggedIn = localStorage.getItem("LoggedStatus");
     const token = JSON.parse(localStorage.getItem("Token") || "null");
     const {
-        post, loading, error, fetchPostById, cherishPost, cherishComment, depreciateComment, depreciatePost,
+        post, loading, error, fetchPostById
     } = usePosts();
-
-    // const [post, setPost,] = useState<Post | null>(null);
     const [newComment, setNewComment] = useState<string>('');
     const [newReply, setNewReply] = useState<{ [key: string]: string }>({});
     const [openReplyBoxId, setOpenReplyBoxId] = useState<string | null>(null);
@@ -25,14 +23,12 @@ export default function PostDetails() {
     const { postId } = useParams<{ postId?: string }>();
     const navigate = useNavigate();
 
-console.log({Post: post})
+console.log({PostInPostContext: post})
 
     useEffect(() => {
         const loadPost = async () => {
             if (postId) {
                 await fetchPostById(postId);
-                // const fetchedPost = 
-                // setPost(fetchedPost);
             }
         };
         loadPost();
@@ -50,25 +46,19 @@ console.log({Post: post})
     async function handleCherishPost(event: React.MouseEvent) {
         event.preventDefault();
         try {
-            if (postId && userId) {
-                await cherishPost(postId, userId, token);
-            } else {
-                alert("Connectse primeiro");
-                navigate('../../login');
-            }
+            await api.put(`/cherish/post/${postId}`, {}, {
+                params: { userId, token }
+            });
         } catch (error) {
             console.error('Error cherishing post:', error);
         }
     }
     async function handleCherishComment(event: React.MouseEvent, commentId: string) {
-        event.preventDefault;
+        event.preventDefault();
         try {
-            if (userId) {
-                await cherishComment(commentId, userId, token);
-            } else {
-                alert("Connectse primeiro");
-                navigate('../../login');
-            }
+            await api.put(`/cherish/comment/${commentId}`, {}, {
+                params: { userId, token }
+            })
         } catch (error) {
             console.error('Error cherishing comment:', error);
         }
@@ -77,32 +67,26 @@ console.log({Post: post})
     async function handleDepreciatePost(event: React.MouseEvent) {
         event.preventDefault();
         try {
-            if (postId && userId) {
-                await depreciatePost(postId, userId, token);
-            } else {
-                alert("Connectse primeiro");
-                navigate('../../login');
-            }
+            await api.put(`depreciate/post/${postId}`, {}, {
+                params: { userId, token }
+            })
         } catch (error) {
             console.error('Error depreciating post:', error);
         }
     }
     async function handleDepreciateComment(event: React.MouseEvent, commentId: string) {
-        event.preventDefault;
+        event.preventDefault();
         try {
-            if (userId) {
-                await depreciateComment(commentId, userId, token);
-            } else {
-                alert("Connectse primeiro");
-                navigate('../../login');
-            }
+            await api.put(`depreciate/comment/${commentId}`, {}, {
+                params: { userId, token }
+            })
         } catch (error) {
             console.error('Error depreciating comment:', error);
         }
     }
 
     async function handlePostDelete(event: React.MouseEvent) {
-        event.preventDefault;
+        event.preventDefault();
         try {
             await api.delete(`post/${postId}`, {
                 params: { userId, token }
@@ -110,6 +94,16 @@ console.log({Post: post})
             navigate('../home')
         } catch (error) {
             console.error('Error deleting post:', error);
+        }
+    };
+    async function handleCommentDelete(event: React.MouseEvent, commentId: string) {
+        event.preventDefault();
+        try {
+            await api.delete(`/comment/${commentId}`, {
+                params: { userId, token }
+            });
+        } catch (error) {
+            console.error('Error deleting comment:', error);
         }
     };
 
@@ -124,11 +118,6 @@ console.log({Post: post})
         const content = newComment;
         await api.post('/comment', { content, postId, userId, token });
         setNewComment('');
-//         if (postId) {
-//             const updatedPost = await fetchPostById(postId);
-// // console.log({Create: updatedPost}); // Log the updated post
-//             setPost(updatedPost);
-//         }
     };
     function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
         event.target.setCustomValidity('');
@@ -138,21 +127,6 @@ console.log({Post: post})
         event.target.setCustomValidity('Esse campo é obrigatório');
     };
 
-    async function handleCommentDelete(event: React.MouseEvent, commentId: string) {
-        event.preventDefault();
-        try {
-            await api.delete(`/comment/${commentId}`, {
-                params: { userId, token }
-            });
-//             if (postId) {
-//                 const updatedPost = await fetchPostById(postId);
-// // console.log({Delete: updatedPost}); // Log the updated post
-//                 setPost(updatedPost);
-//             }
-        } catch (error) {
-            console.error('Error deleting comment:', error);
-        }
-    };
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
         event.preventDefault();
         if (!isLoggedIn || !token) {
@@ -163,10 +137,6 @@ console.log({Post: post})
         }
         const content = newReply[parentCommentId || ''];
         await api.post('/comment/sub', { content, postId, parentCommentId, userId, token });
-        // if (postId) {
-        //     const updatedPost = await fetchPostById(postId);
-        //     setPost(updatedPost);
-        // }
         setNewReply(prevState => ({ ...prevState, [parentCommentId || '']: '' }));
         setOpenReplyBoxId(null);
     }

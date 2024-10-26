@@ -1,26 +1,7 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
-
-interface Comment {
-    id: string;
-    content: string;
-    asfCoins: number;
-    createdAt: Date;
-    postId: string;
-    parentCommentId: string | null;
-    replies?: Comment[];
-}
-
-interface Post {
-    id: string;
-    title: string;
-    content: string;
-    asfCoins: number;
-    createdAt: Date;
-    option: string;
-    comments: Comment[];
-}
+import { Comment, Post } from "../../utils/pub-sub";
 
 export async function getPost(app: FastifyInstance) {
     app.get('/posts/:postId', async (request, reply) => {
@@ -35,7 +16,28 @@ export async function getPost(app: FastifyInstance) {
                 id: postId,
             },
             include: {
-                comments: {}
+                comments: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                registeredAt: true,
+                                beeKeeper: true,
+                            }
+                        }
+                    }
+                },
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        registeredAt: true,
+                        beeKeeper: true,
+                    }
+                }
             }
         })
 
@@ -43,14 +45,15 @@ export async function getPost(app: FastifyInstance) {
             throw new Error("Post not found")
         }
 
-        const orderedComments = organizeComments(post.comments)
-
-        const orderedPost = {
-            ...post,
-            comments: orderedComments
+        if (post.comments) {
+            const orderedComments = organizeComments(post.comments);
+            const orderedPost = {
+                ...post,
+                comments: orderedComments
+            }
+            return reply.status(201).send(orderedPost)
         }
-
-        return reply.status(201).send(orderedPost)
+        return reply.status(201).send(post)
     })
 }
 
@@ -64,10 +67,10 @@ function organizeComments(comments: Comment[]): Comment[] {
     })
 
     comments.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    
+
     // Organize comments into hierarchical structure
     comments.forEach(comment => {
-        if (comment.parentCommentId !== null) {
+        if (comment.parentCommentId !== null && comment.parentCommentId !== undefined) {
             const parentComment = commentMap[comment.parentCommentId]
             if (parentComment) {
                 if (!parentComment.replies) {

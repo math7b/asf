@@ -62,10 +62,6 @@ export interface PostsContextType {
     error: string | null;
     fetchPosts: () => Promise<void>;
     fetchPostById: (postId: string) => Promise<Post | null>;
-    cherishPost: (postId: string, userId: string, token: string) => Promise<void>;
-    cherishComment: (commentId: string, userId: string, token: string) => Promise<void>;
-    depreciatePost: (postId: string, userId: string, token: string) => Promise<void>;
-    depreciateComment: (commentId: string, userId: string, token: string) => Promise<void>;
 }
 
 export interface PostsState {
@@ -75,13 +71,13 @@ export interface PostsState {
 }
 
 export interface PostMessage {
-    action: 'create' | 'delete';
+    action: 'create' | 'delete' | 'cherish' | 'depreciate';
     type: 'post' | 'comment' | 'id';
     data: {
-        post?: Post,
-        comment?: Comment,
-        id?: string,
-        userId?: string,
-        user?: UsersData
+        post?: {},
+        comment?: {},
+        postId?: string,
+        commentId?: string,
+        userId?: string
     };
 };
