@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const Container = styled.main`
+export const Container = styled.div`
     flex: 1;
     
     display: flex;
@@ -8,16 +8,48 @@ export const Container = styled.main`
     align-items: center;
     justify-content: center;
 `
-export const StyledPosts = styled.div`
 
+export const Menu = styled.ul`
+    background: ${props => props.theme.colors.color_800};
+    margin-bottom: 16px;
+    border-radius: 4px;
+    display: inline;
+    padding: 4px;
+`
+
+interface MenuItemProps {
+    isActive: boolean;
+}
+
+export const MenuItem = styled.li<MenuItemProps>`
+    cursor: pointer;
+    display: inline;
+    padding: 6px;
+    color: ${({ isActive, theme }) => (
+        isActive ?
+            theme.texts.text_300 :
+            theme.texts.text_950
+    )};
+    &:hover {
+        color: ${props => props.theme.texts.text_100};
+    }
+    &:first-child {
+        margin-right: 10px;
+    }
+`;
+
+export const StyledPosts = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+    p {
+        color: ${props => props.theme.texts.text_950};
+    }
 `
 
 export const StyledPost = styled.div`
-    width: 40%;
+    width: 24rem;
     img {
         width: 100%;
         border-radius: 0px 0px 24px 24px;
@@ -34,7 +66,7 @@ export const StyledPost = styled.div`
     &:hover a {
         div {
             div{
-                background-color: ${props => props.theme.colors.color_200};
+                background: ${props => props.theme.colors.color_200};
                 border-radius: 4px 4px 0px 0px;
             }
         }
@@ -50,12 +82,18 @@ export const Title = styled.div`
     display: block;
     padding: 0.5rem 0.25rem 0.25rem 0.5rem;
     font-size: 0.875rem;
+    p {
+        display: inline;
+    }
+    p:first-child {
+        margin-right: 8px;
+    }
 `
 
 export const Info = styled.div`
-    display: inline;
+    display: block;
     height: 100%;
-    margin: 0 0.5rem 0.5rem 0.5rem;
+    padding: 0.2rem 0.25rem 0.4rem 0.5rem;
     font-size: 0.75rem;
     color: ${props => props.theme.texts.text_600};
     p {

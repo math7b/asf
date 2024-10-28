@@ -22,15 +22,6 @@ export const Title = styled.div`
     width: 100%;
 `;
 
-export const CustonInput = styled.input`
-    display: block;
-    width: 100%;
-    margin-top: 8px;
-    padding: 0.5rem;
-    border: 1px solid #767676;
-    border-radius: 8px;
-`;
-
 export const Content = styled.div`
     margin-top: 32px;
     margin-bottom: 32px;

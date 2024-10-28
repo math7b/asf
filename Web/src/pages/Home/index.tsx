@@ -2,13 +2,15 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { Link } from "react-router-dom";
 import {
-    Container, Content, Info, StyledPost, StyledPosts, Title
+    Container, Content, Info, Menu, MenuItem, StyledPost, StyledPosts, Title
 } from "./styles";
 import { Post } from "../../interfaces";
 import { usePosts } from "../../components/PostContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+    const [menuOption, setMenuOption] = useState('all');
+
     const { posts, loading, error } = usePosts();
 
     useEffect(() => {
@@ -19,40 +21,73 @@ export default function Home() {
     }, [error]);
     if (loading) return <p>Loading posts...</p>;
 
+    function handleToggleMenuOption(menuOption: string) {
+        setMenuOption(menuOption);
+    };
+
+    const filteredPosts = menuOption === "all" ? posts : posts.filter(post => post.option === menuOption);
+
     return (
         <Container>
+            <Menu>
+                <MenuItem isActive={menuOption === "all"}
+                    onClick={() => handleToggleMenuOption("all")}>
+                    Home
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "event"}
+                    onClick={() => handleToggleMenuOption("event")}>
+                    Eventos
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "help"}
+                    onClick={() => handleToggleMenuOption("help")}>
+                    Urgentes
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "question"}
+                    onClick={() => handleToggleMenuOption("question")}>
+                    Duvidas
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "curiosity"}
+                    onClick={() => handleToggleMenuOption("curiosity")}>
+                    Curiosidades
+                </MenuItem>
+            </Menu>
             <StyledPosts>
-                {posts.map((post: Post) => (
-                    <StyledPost key={post.id}>
-                        <Link to={`../posts/${post.id}`}>
-                            <div>
-                                <Content>
-                                    <Title>
-                                        <p>{post.title}</p>
-                                    </Title>
-                                    <Info>
-                                        <p>{post.asfCoins} Coins</p>
-                                        <time>{
-                                            formatDistanceToNow(post.createdAt, {
-                                                locale: ptBR,
-                                                addSuffix: true,
-                                            })
-                                        }</time>
-                                    </Info>
-                                </Content>
-                                <img src={
-                                    `src/assets/${post.option === "event" ? "event.jpg" :
-                                        post.option === "help" ? "help.jpg" :
-                                            post.option === "question" ? "question.jpg" :
-                                                post.option === "curiosity" ? "curiosity.jpg" :
-                                                    "event.jpg"
-                                    }`}
-                                    alt=""
-                                />
-                            </div>
-                        </Link>
-                    </StyledPost>
-                ))}
+                {filteredPosts.length > 0 ? (
+                    filteredPosts.map((post: Post) => (
+                        <StyledPost key={post.id}>
+                            <Link to={`../posts/${post.id}`}>
+                                <div>
+                                    <Content>
+                                        <Title>
+                                            <p>{
+                                                post.option === "event" ? "[Eventos]" :
+                                                    post.option === "help" ? "[Urgentes]" :
+                                                        post.option === "question" ? "[Duvidas]" :
+                                                            post.option === "curiosity" ? "[Curiosidades]" :
+                                                                null
+                                            }</p>
+                                            <p>{post.title}</p>
+                                        </Title>
+                                        <Info>
+                                            <p>{post.asfCoins} Coins</p>
+                                            <time>{
+                                                formatDistanceToNow(post.createdAt, {
+                                                    locale: ptBR,
+                                                    addSuffix: true,
+                                                })
+                                            }</time>
+                                        </Info>
+                                    </Content>
+                                    <img src={'src/assets/flower.jpg'} alt="" />
+                                </div>
+                            </Link>
+                        </StyledPost>
+                    ))
+                ) : <p>Sem postagens</p>}
             </StyledPosts>
         </Container>
     );

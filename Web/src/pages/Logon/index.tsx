@@ -3,6 +3,7 @@ import { Container } from "./styles";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { LoggonApi } from "../../interfaces";
+import { CustonInput } from "../../styles/global";
 
 export function Logon() {
     const [email, setEmail] = useState('');
@@ -29,25 +30,26 @@ export function Logon() {
     return (
         <Container>
             <form onSubmit={Logon}>
-                <label htmlFor="femail">Your e-mail:</label>
-                <input type="email"
+                <label htmlFor="femail">Seu e-mail:</label>
+                <CustonInput type="email"
                     id="femail"
                     name="femail"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="email@email.com"
                     required
-                />
-                <label htmlFor="fpassword">Your password:</label>
-                <input type="password"
+                    />
+                <label htmlFor="fpassword">Senha</label>
+                <CustonInput type="password"
                     id="fpassword"
                     name="fpassword"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
+                    placeholder="Senha"
                     required
                 />
                 <button type="submit">
-                    Publicar
+                    Logar
                 </button>
             </form>
         </Container>

@@ -37,13 +37,13 @@ export const GlobalStyle = createGlobalStyle`
         border-radius: 8px;
         font-size: 0.875rem;
         margin-right: 8px;
-
-        background: ${props => props.theme.texts.text_300};
+        padding: 8px;
+        background: ${props => props.theme.colors.color_400};
         color: ${props => props.theme.texts.text_950};
 
         &:hover {
             cursor: pointer;
-            color: ${props => props.theme.colors.color_800};
+            color: ${props => props.theme.texts.text_100};
         }
     }
 `
@@ -76,3 +76,12 @@ export const StyledPost = styled.div`
         margin-top: 16px;
     }
 `
+
+export const CustonInput = styled.input`
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 0.5rem;
+    border: 1px solid #767676;
+    border-radius: 8px;
+`;

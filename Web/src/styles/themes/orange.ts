@@ -8,11 +8,14 @@ export default {
         color_400: '#fb923c',
         color_600: '#ea580c',
         color_800: '#9a3412',
+        color_900: '#7c2d12',
+        color_950: '#431407',
 
         color_white_opack: 'rgba(999, 999, 999, 0.88)',
         color_white: '#fff',
     },
     texts: {
+        text_100: '#f5f5f4',
         text_300: '#d6d3d1',
         text_600: '#525252',
         text_800: '#262626',

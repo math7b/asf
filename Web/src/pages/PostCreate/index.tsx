@@ -1,12 +1,11 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { Container } from "../../styles/global";
+import { Container, CustonInput } from "../../styles/global";
 import {
-    Buttons, Content, CustonInput,
+    Buttons, Content,
     Option, PostForm, Title
 } from "./styles";
-import { LoggedUser } from "../../interfaces";
 
 export default function PostCreate() {
     const [title, setTitle] = useState('');
