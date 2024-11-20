@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { verifyToken } from "../token";
 import { pubSub } from "../../utils/pub-sub";
+import { decrypt } from "dotenv";
 
 export async function createSubComment(app: FastifyInstance) {
     app.post('/comment/sub', async (request, reply) => {
@@ -71,6 +72,7 @@ export async function createSubComment(app: FastifyInstance) {
                         id: true,
                         name: true,
                         email: true,
+                        state: true,
                         registeredAt: true,
                         beeKeeper: true,
                     }
@@ -80,7 +82,18 @@ export async function createSubComment(app: FastifyInstance) {
         if (!comment) {
             return reply.status(404).send({ message: "Sub comment not found" });
         }
-        pubSub.publish('asf', { action: 'create', type: 'comment', data: { comment } })
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                asfCoins: {
+                    increment: 2
+                }
+            }
+        })
+        pubSub.publish('postdetails', { action: 'create', type: 'comment', data: { comment, userId } })
+        pubSub.publish('userdetails', { action: 'create', type: 'comment', data: { userId } })
         return reply.status(201).send();
     });
 }

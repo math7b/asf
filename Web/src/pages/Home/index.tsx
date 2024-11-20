@@ -7,6 +7,7 @@ import {
 import { Post } from "../../interfaces";
 import { usePosts } from "../../components/PostContext";
 import { useEffect, useState } from "react";
+import flower from '../../assets/flower.jpg';
 
 export default function Home() {
     const [menuOption, setMenuOption] = useState('all');
@@ -42,7 +43,7 @@ export default function Home() {
                 <MenuItem
                     isActive={menuOption === "help"}
                     onClick={() => handleToggleMenuOption("help")}>
-                    Urgentes
+                    Ajuda
                 </MenuItem>
                 <MenuItem
                     isActive={menuOption === "question"}
@@ -65,7 +66,7 @@ export default function Home() {
                                         <Title>
                                             <p>{
                                                 post.option === "event" ? "[Eventos]" :
-                                                    post.option === "help" ? "[Urgentes]" :
+                                                    post.option === "help" ? "[Ajuda]" :
                                                         post.option === "question" ? "[Duvidas]" :
                                                             post.option === "curiosity" ? "[Curiosidades]" :
                                                                 null
@@ -73,6 +74,8 @@ export default function Home() {
                                             <p>{post.title}</p>
                                         </Title>
                                         <Info>
+                                            {post.user.beeKeeper!==null ? <p>Apicultor</p> : null}
+                                            <p>{post.user?.name}</p>
                                             <p>{post.asfCoins} Coins</p>
                                             <time>{
                                                 formatDistanceToNow(post.createdAt, {
@@ -82,7 +85,7 @@ export default function Home() {
                                             }</time>
                                         </Info>
                                     </Content>
-                                    <img src={'src/assets/flower.jpg'} alt="" />
+                                    <img src={flower} alt="" />
                                 </div>
                             </Link>
                         </StyledPost>

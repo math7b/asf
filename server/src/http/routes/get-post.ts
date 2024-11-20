@@ -23,6 +23,7 @@ export async function getPost(app: FastifyInstance) {
                                 id: true,
                                 name: true,
                                 email: true,
+                                state: true,
                                 registeredAt: true,
                                 beeKeeper: true,
                             }
@@ -34,6 +35,7 @@ export async function getPost(app: FastifyInstance) {
                         id: true,
                         name: true,
                         email: true,
+                        state: true,
                         registeredAt: true,
                         beeKeeper: true,
                     }

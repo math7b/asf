@@ -19,18 +19,61 @@ export async function depreciateComment(app: FastifyInstance) {
         if (!verifyedToken.valid) {
             return reply.status(400).send({ message: "Not authorized" });
         }
+        const getCommentCreator = await prisma.comment.findUnique({
+            where: {
+                id: commentId
+            },
+            select: {
+                userId: true
+            }
+        })
+        if (getCommentCreator?.userId === userId) {
+            return reply.status(400).send({ message: "O criador não pode desvalorizar a propria postagem." })
+        }
+        const getASFCoinsOfCheirisherUser = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                asfCoins: true
+            }
+        })
+        if (getASFCoinsOfCheirisherUser === null || getASFCoinsOfCheirisherUser?.asfCoins < 2) {
+            return reply.status(400).send({ message: "Apreciação não altorizada, falta moedas." })
+        }
         await prisma.comment.update({
             where: {
-                id: commentId,
-                userId: userId,
+                id: commentId
             },
             data: {
                 asfCoins: {
-                    decrement: 1,
+                    decrement: 1
                 },
             },
         })
-        pubSub.publish('asf', { action: "depreciate", type: "comment", data: { commentId } })
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                asfCoins: {
+                    decrement: 2
+                }
+            },
+        })
+        await prisma.user.update({
+            where: {
+                id: getCommentCreator?.userId
+            },
+            data: {
+                asfCash: {
+                    decrement: 1
+                }
+            }
+        })
+        const commentCreator = getCommentCreator?.userId;
+        pubSub.publish('postdetails', { action: "depreciate", type: "comment", data: { commentId } })
+        pubSub.publish('userdetails', { action: "depreciate", type: "comment", data: { commentId, userId, commentCreator } })
         return reply.status(201).send();
     })
 }

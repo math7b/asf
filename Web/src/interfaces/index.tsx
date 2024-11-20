@@ -19,6 +19,20 @@ export interface Post {
     option: string;
     comments: Comment[];
     user: UsersData;
+    userId: string;
+}
+
+export interface SinglePost {
+    id: string;
+    title: string;
+    content: string;
+    asfCoins: number;
+    createdAt: string;
+    postId: string;
+    option: string;
+    comments: Comment[];
+    user: UsersData;
+    userId: string;
 }
 
 export interface BeeKeeper {
@@ -42,17 +56,23 @@ export interface LoggedUser {
     id: string;
     name: string;
     email: string;
+    state: string;
     asfCash: number;
     asfCoins: number;
     registeredAt: string;
-    beeKeeper: BeeKeeper;
-    posts: Post[];
-    comments: Comment
+    beeKeeper: BeeKeeper | null;
+    posts: Post[] | null;
+    comments: Comment[] | null
 }
 
 export interface LoggonApi {
     Data: LoggedUser,
-    Token: string
+    Token: string,
+    message: string
+}
+
+export interface NewUserRegister {
+    UserId: string
 }
 
 export interface PostsContextType {
@@ -64,6 +84,11 @@ export interface PostsContextType {
     fetchPostById: (postId: string) => Promise<Post | null>;
 }
 
+export interface UserContextType {
+    updateLoggedUserData: (data: LoggedUser) => void;
+    loggedUserData: LoggedUser | null;
+}
+
 export interface PostsState {
     posts: Post[];
     loading: boolean;
@@ -71,6 +96,19 @@ export interface PostsState {
 }
 
 export interface PostMessage {
+    action: 'create' | 'delete' | 'cherish' | 'depreciate';
+    type: 'post' | 'comment' | 'id';
+    data: {
+        post?: {},
+        postId?: string,
+        comment?: {},
+        commentId?: string,
+        commentCreator?: string,
+        userId?: string,
+    };
+};
+
+export interface UserMessage {
     action: 'create' | 'delete' | 'cherish' | 'depreciate';
     type: 'post' | 'comment' | 'id';
     data: {

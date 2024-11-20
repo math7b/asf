@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { verifyToken } from "../token";
 import { Message, pubSub } from "../../utils/pub-sub";
+import { decrypt } from "dotenv";
 
 export async function createPost(app: FastifyInstance) {
     app.post('/post', async (request, reply) => {
@@ -22,7 +23,7 @@ export async function createPost(app: FastifyInstance) {
             data: {
                 title,
                 content,
-                asfCoins: 3,
+                asfCoins: 4,
                 option,
                 user: {
                     connect: {
@@ -31,10 +32,9 @@ export async function createPost(app: FastifyInstance) {
                 },
             },
         })
-        const id = postCreated.id;
         const post = await prisma.post.findUnique({
             where: {
-                id: id
+                id: postCreated.id
             },
             select: {
                 id: true,
@@ -49,6 +49,7 @@ export async function createPost(app: FastifyInstance) {
                         id: true,
                         name: true,
                         email: true,
+                        state: true,
                         registeredAt: true,
                         beeKeeper: true,
                     }
@@ -58,7 +59,18 @@ export async function createPost(app: FastifyInstance) {
         if (!post) {
             return reply.status(404).send({ message: "Post not found" });
         }
-        pubSub.publish('asf', { action: 'create', type: 'post', data: { post } })
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                asfCoins: {
+                    increment: 4
+                }
+            }
+        })
+        pubSub.publish('postdetails', { action: 'create', type: 'post', data: { post, userId } })
+        pubSub.publish('userdetails', { action: 'create', type: 'post', data: { userId } })
         return reply.status(201).send()
     })
 }

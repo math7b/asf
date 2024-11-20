@@ -4,6 +4,7 @@ import { prisma } from "../../lib/prisma";
 import { connect } from "http2";
 import { verifyToken } from "../token";
 import { Message, pubSub } from "../../utils/pub-sub";
+import { decrypt } from "dotenv";
 
 export async function createComment(app: FastifyInstance) {
     app.post('/comment', async (request, reply) => {
@@ -34,10 +35,9 @@ export async function createComment(app: FastifyInstance) {
                 },
             }
         })
-        const id = commentCreated.id;
         const comment = await prisma.comment.findUnique({
             where: {
-                id: id,
+                id: commentCreated.id,
             },
             select: {
                 id: true,
@@ -52,6 +52,7 @@ export async function createComment(app: FastifyInstance) {
                         id: true,
                         name: true,
                         email: true,
+                        state: true,
                         registeredAt: true,
                         beeKeeper: true,
                     }
@@ -61,7 +62,18 @@ export async function createComment(app: FastifyInstance) {
         if (!comment) {
             return reply.status(404).send({ message: "Comment not found" });
         }
-        pubSub.publish('asf', { action: 'create', type: 'comment', data: { comment } })
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                asfCoins: {
+                    increment: 2
+                }
+            }
+        })
+        pubSub.publish('postdetails', { action: 'create', type: 'comment', data: { comment, userId } })
+        pubSub.publish('userdetails', { action: 'create', type: 'comment', data: { userId } })
         return reply.status(201).send()
     })
 }

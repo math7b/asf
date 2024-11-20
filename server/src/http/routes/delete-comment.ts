@@ -44,7 +44,7 @@ export async function deleteComment(app: FastifyInstance) {
                 userId: userId,
             },
         })
-        pubSub.publish('asf', { action: 'delete', type: 'comment', data: { commentId, userId } })
+        pubSub.publish('postdetails', { action: 'delete', type: 'comment', data: { commentId, userId } })
         return reply.status(201).send()
     })
 }

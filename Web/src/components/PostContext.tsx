@@ -1,27 +1,22 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../services/api';
-import { Comment, PostMessage, Post, PostsContextType } from '../interfaces';
+import { Comment, PostMessage, Post, PostsContextType, SinglePost, LoggedUser } from '../interfaces';
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [posts, setPosts] = useState<Post[]>([]);
+    const [post, setPost] = useState<SinglePost | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [post, setPost] = useState<Post | null>(null);
     const [fetchedPostIds, setFetchedPostIds] = useState<Set<string>>(new Set());
-    console.log({
-        Posts: posts,
-        Post: post,
-        FetchedPostIdsA: fetchedPostIds
-    })
 
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            const response = await api.get<Post[]>('/posts');
-            setPosts(response.data);
-        } catch (err) {
+            const responsePostData = await api.get<Post[]>('/posts');
+            setPosts(responsePostData.data);
+        } catch (error) {
             setError('Failed to fetch posts.');
         } finally {
             setLoading(false);
@@ -29,25 +24,20 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     useEffect(() => {
-        const socket = new WebSocket('ws://localhost:3333/posts/results');
-
+        const socket = new WebSocket(`ws://localhost:3333/realtime/posts/${post?.id}`);
         socket.onopen = () => {
-            console.log('WebSocket connection established');
+            console.log('WebSocket connection established, postContext');
         };
-
         socket.onmessage = (event) => {
             const message: PostMessage = JSON.parse(event.data);
             handleMessage(message);
         };
-
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
-
         socket.onclose = (event) => {
             console.log('WebSocket connection closed:', event);
         };
-
         return () => {
             socket.close();
         };
@@ -57,21 +47,19 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         comments: Comment[], newComment: Comment, parentId: string
     ): Comment[] => {
         return comments.map((comment) => {
-            // If this comment is the parent, add the new reply
             if (comment.id === parentId) {
                 return {
                     ...comment,
                     replies: [...(comment.replies || []), newComment],
                 };
             }
-            // If the comment has replies, check them recursively
             else if (comment.replies && comment.replies.length > 0) {
                 return {
                     ...comment,
                     replies: addCommentRecursively(comment.replies, newComment, parentId),
                 };
             }
-            return comment; // Return unchanged comment if no matches found
+            return comment;
         });
     };
 

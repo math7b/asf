@@ -6,26 +6,29 @@ import {
     Buttons, Content,
     Option, PostForm, Title
 } from "./styles";
+import { useUser } from "../../components/UserContext";
 
 export default function PostCreate() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [option, setOption] = useState('');
+
+    const {loggedUserData} = useUser();
+    
     const navigate = useNavigate();
 
-    const isLoggedIN = localStorage.getItem("LoggedStatus");
+    const isLoggedIn = localStorage.getItem("LoggedStatus");
     const token = JSON.parse(localStorage.getItem("Token") || "null");
-    const loggedUser = JSON.parse(localStorage.getItem("Data") || "null");
 
     async function handleNewPostCreate(event: FormEvent) {
         event.preventDefault();
-        if (!isLoggedIN || !token) {
+        if (!isLoggedIn || !token) {
             localStorage.clear();
             alert(`Fantasmas não podem criar conteudos.`);
             navigate('/login');
             return;
         }
-        const userId = loggedUser?.id
+        const userId = loggedUserData?.id;
         try {
             await api.post('/post', { title, content, option, userId, token });
             setTitle('');
@@ -127,7 +130,7 @@ export default function PostCreate() {
                 </Option>
 
                 <Buttons>
-                    <Link to={"/"}>
+                    <Link to={"/home"}>
                         <button>
                             Cancelar
                         </button>

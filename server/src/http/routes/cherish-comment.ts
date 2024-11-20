@@ -19,18 +19,61 @@ export async function cherishComment(app: FastifyInstance) {
         if (!verifyedToken.valid) {
             return reply.status(400).send({ message: "Not authorized" });
         }
+        const getCommentCreator = await prisma.comment.findUnique({
+            where: {
+                id: commentId
+            },
+            select: {
+                userId: true
+            }
+        })
+        if (getCommentCreator?.userId === userId) {
+            return reply.status(400).send({ message: "O criador não pode valorizar a propria postagem." })
+        }
+        const getASFCoinsOfCheirisherUser = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                asfCoins: true
+            }
+        })
+        if (getASFCoinsOfCheirisherUser === null || getASFCoinsOfCheirisherUser?.asfCoins < 2) {
+            return reply.status(400).send({ message: "Apreciação não altorizada, falta moedas." })
+        }
         await prisma.comment.update({
             where: {
-                id: commentId,
-                userId: userId,
+                id: commentId
             },
             data: {
                 asfCoins: {
-                    increment: 1,
+                    increment: 1
+                },
+            },
+        })
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                asfCoins: {
+                    decrement: 2
                 }
             }
         })
-        pubSub.publish('asf', { action: "cherish", type: "comment", data: { commentId } })
+        await prisma.user.update({
+            where: {
+                id: getCommentCreator?.userId
+            },
+            data: {
+                asfCash: {
+                    increment: 1
+                }
+            }
+        })
+        const commentCreator = getCommentCreator?.userId;
+        pubSub.publish('postdetails', { action: "cherish", type: "comment", data: { commentId } })
+        pubSub.publish('userdetails', { action: "cherish", type: "comment", data: { commentId, userId, commentCreator } })
         return reply.status(201).send();
     })
 }

@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
 import { usePosts } from '../../components/PostContext';
-import { Post, Comment } from '../../interfaces';
+import { Comment } from '../../interfaces';
 import { CaretDown, CaretUp, Trash } from 'phosphor-react';
 import api from '../../services/api';
 import { Container, StyledPost } from "../../styles/global";
-import { Content, CreateComment, CreateReplay, Info, Title, Votes } from './styles';
+import { Content, CreateComment, CreateReplay, DeleteButton, Info, Title, VoteButton, Votes } from './styles';
 
 export default function PostDetails() {
     const userId = JSON.parse(localStorage.getItem("LoggedUserId") || "null");
@@ -23,7 +23,11 @@ export default function PostDetails() {
     const { postId } = useParams<{ postId?: string }>();
     const navigate = useNavigate();
 
-console.log({PostInPostContext: post})
+    useEffect(() => {
+        if (postId) {
+            fetchPostById(postId)
+        }
+    }, [])
 
     useEffect(() => {
         const loadPost = async () => {
@@ -49,8 +53,9 @@ console.log({PostInPostContext: post})
             await api.put(`/cherish/post/${postId}`, {}, {
                 params: { userId, token }
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error cherishing post:', error);
+            alert(error.response.data.message);
         }
     }
     async function handleCherishComment(event: React.MouseEvent, commentId: string) {
@@ -59,8 +64,9 @@ console.log({PostInPostContext: post})
             await api.put(`/cherish/comment/${commentId}`, {}, {
                 params: { userId, token }
             })
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error cherishing comment:', error);
+            alert(error.response.data.message);
         }
     }
 
@@ -70,8 +76,9 @@ console.log({PostInPostContext: post})
             await api.put(`depreciate/post/${postId}`, {}, {
                 params: { userId, token }
             })
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error depreciating post:', error);
+            alert(error.response.data.message);
         }
     }
     async function handleDepreciateComment(event: React.MouseEvent, commentId: string) {
@@ -80,8 +87,9 @@ console.log({PostInPostContext: post})
             await api.put(`depreciate/comment/${commentId}`, {}, {
                 params: { userId, token }
             })
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error depreciating comment:', error);
+            alert(error.response.data.message);
         }
     }
 
@@ -160,19 +168,29 @@ console.log({PostInPostContext: post})
             comments.map(comment => (
                 <StyledPost key={comment.id}>
                     <Votes>
-                        <span onClick={(e) => handleCherishComment(e, comment.id)}>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || comment.user.id === userId) return;
+                            handleCherishComment(e, comment.id)
+                        }}
+                            disabled={!userId || comment.user.id === userId}
+                        >
                             <CaretUp size={20} />
-                        </span>
+                        </VoteButton>
                         <p>{comment.asfCoins}</p>
-                        <span onClick={(e) => handleDepreciateComment(e, comment.id)}>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || comment.user.id === userId) return;
+                            handleDepreciateComment(e, comment.id)
+                        }}
+                            disabled={!userId || comment.user.id === userId}
+                        >
                             <CaretDown size={20} />
-                        </span>
+                        </VoteButton>
                         <div></div>
                     </Votes>
                     <Content>
                         <Info>
                             <div>
-                                <p>Matheus Barth</p>
+                                <p>{comment.user.name}</p>
                                 <time>{
                                     formatDistanceToNow(comment.createdAt, {
                                         locale: ptBR,
@@ -180,9 +198,14 @@ console.log({PostInPostContext: post})
                                     })
                                 }</time>
                             </div>
-                            <span onClick={(e) => handleCommentDelete(e, comment.id)}>
+                            <DeleteButton onClick={(e) => {
+                                if (!userId || comment.user.id !== userId) return;
+                                handleCommentDelete(e, comment.id)
+                            }}
+                                disabled={!userId || comment.user.id !== userId}
+                            >
                                 <Trash size={16} />
-                            </span>
+                            </DeleteButton>
                         </Info>
                         {comment.content}
                         <CreateReplay onSubmit={(event) => handleNewReplyCreate(event, comment.id)}>
@@ -221,17 +244,29 @@ console.log({PostInPostContext: post})
             <>
                 <StyledPost key={post?.id}>
                     <Votes>
-                        <span onClick={(e) => handleCherishPost(e)}><CaretUp size={20} /></span>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || post?.userId === userId) return;
+                            handleCherishPost(e)
+                        }}
+                            disabled={!userId || post?.userId === userId}
+                        >
+                            <CaretUp size={20} />
+                        </VoteButton>
                         <p>{post?.asfCoins}</p>
-                        <span onClick={(e) => handleDepreciatePost(e)}>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || post?.userId === userId) return;
+                            handleDepreciatePost(e)
+                        }}
+                            disabled={!userId || post?.userId === userId}
+                        >
                             <CaretDown size={20} />
-                        </span>
+                        </VoteButton>
                         <div></div>
                     </Votes>
                     <Content>
                         <Info>
                             <div>
-                                <p>Matheus Barth</p>
+                                <p>{post?.user.name}</p>
                                 <time>{post ?
                                     formatDistanceToNow(post.createdAt, {
                                         locale: ptBR,
@@ -239,7 +274,14 @@ console.log({PostInPostContext: post})
                                     }
                                     ) : 'Date not available'}</time>
                             </div>
-                            <span onClick={(e) => handlePostDelete(e)}><Trash size={16} /></span>
+                            <DeleteButton onClick={(e) => {
+                                if (!userId || post?.userId !== userId) return;
+                                handlePostDelete(e)
+                            }}
+                                disabled={!userId || post?.userId !== userId}
+                            >
+                                <Trash size={16} />
+                            </DeleteButton>
                         </Info>
                         <Title>
                             {post?.title}

@@ -2,7 +2,6 @@ import { date, number } from "zod";
 
 export type BeeKeeper = {
     id: string;
-    state: string;
     city: string;
     phoneNumber: string;
     RG: string;
@@ -15,6 +14,7 @@ export type User = {
     id: string;
     name: string;
     email: string;
+    state: string;
     registeredAt: Date;
     beeKeeper?: BeeKeeper | null;
 };
@@ -46,10 +46,11 @@ export type Message = {
     type: 'post' | 'comment';
     data: {
         post?: {},
-        comment?: {},
         postId?: string,
+        comment?: {},
         commentId?: string,
-        userId?: string
+        commentCreator?: string,
+        userId?: string,
     };
 };
 export type Subscriber = (message: Message) => void;

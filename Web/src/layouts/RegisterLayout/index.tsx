@@ -1,10 +1,10 @@
-import { Logon } from "../../pages/Logon";
+import { Register } from "../../pages/Register";
 import { LayoutContainer } from "./styles";
 
-export function LoginLayout() {
+export function RegisterLayout() {
     return (
         <LayoutContainer>
-            <Logon />
+            <Register />
         </LayoutContainer>
     );
 }
