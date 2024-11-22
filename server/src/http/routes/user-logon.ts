@@ -27,15 +27,13 @@ export async function logon(app: FastifyInstance) {
             },
             select: {
                 id: true,
-                iv: false,
                 name: true,
                 email: true,
                 password: false,
+                state: true,
                 asfCoins: true,
                 asfCash: true,
                 registeredAt: true,
-                posts: true,
-                comments: true,
                 beeKeeper: true,
             }
         })
@@ -45,7 +43,6 @@ export async function logon(app: FastifyInstance) {
         if (data.beeKeeper) {
             data.beeKeeper = {
                 ...data.beeKeeper,
-                state: decrypt(data.beeKeeper.state, user.iv),
                 city: decrypt(data.beeKeeper.city, user.iv),
                 phoneNumber: decrypt(data.beeKeeper.phoneNumber, user.iv),
                 RG: decrypt(data.beeKeeper.RG, user.iv),
@@ -56,7 +53,7 @@ export async function logon(app: FastifyInstance) {
         if (data.beeKeeper) {
             beeKeeper = true;
         }
-        const newToken = generateToken(user.id, user.name, user.email, beeKeeper);
+        const newToken = generateToken(user.id, user.name, user.email, user.state, beeKeeper);
         return reply.status(201).send({
             Data: data,
             Token: newToken

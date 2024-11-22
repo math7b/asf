@@ -1,28 +1,82 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
+import { verifyToken } from "../token";
+import { pubSub } from "../../utils/pub-sub";
+import { decrypt } from "dotenv";
 
 export async function cherishPost(app: FastifyInstance) {
-    app.post('/cherish/post/:postId', async (request, reply) => {
-        const cherishPostParams = z.object({
+    app.put('/cherish/post/:postId', async (request, reply) => {
+        const zPostId = z.object({
             postId: z.string(),
-            userId: z.string(),
         })
-
-        const { postId, userId } = cherishPostParams.parse(request.params)
-
+        const zPostQuery = z.object({
+            userId: z.string(),
+            token: z.string(),
+        })
+        const { postId } = zPostId.parse(request.params)
+        const { userId, token } = zPostQuery.parse(request.query)
+        const verifyedToken = verifyToken(token);
+        if (!verifyedToken.valid) {
+            return reply.status(400).send({ message: "Não altorizado" });
+        }
+        const getPostCreator = await prisma.post.findUnique({
+            where: {
+                id: postId
+            },
+            select: {
+                userId: true
+            }
+        })
+        if (getPostCreator?.userId === userId) {
+            return reply.status(400).send({ message: "O criador não pode valorizar a propria postagem." })
+        }
+        const getASFCoinsOfCheirisherUser = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                asfCoins: true
+            }
+        })
+        if (getASFCoinsOfCheirisherUser === null || getASFCoinsOfCheirisherUser?.asfCoins < 2) {
+            return reply.status(400).send({ message: "Apreciação não altorizada, falta moedas." })
+        }
         await prisma.post.update({
             where: {
-                id: postId,
-                userId: userId,
+                id: postId
             },
             data: {
                 asfCoins: {
-                    increment: 1,
+                    increment: 1
                 },
             },
         })
-
+        const updateASFCoinsAndGeIV = await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                asfCoins: {
+                    decrement: 2
+                }
+            },
+            select: {
+                iv: true
+            }
+        })
+        await prisma.user.update({
+            where: {
+                id: getPostCreator?.userId
+            },
+            data: {
+                asfCash: {
+                    increment: 1
+                }
+            }
+        })
+        pubSub.publish('postdetails', { action: "cherish", type: "post", data: { postId, userId } })
+        pubSub.publish('userdetails', { action: "cherish", type: "post", data: { userId } })
         return reply.status(201).send();
     })
 }

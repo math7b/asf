@@ -8,13 +8,6 @@ export const Votes = styled.div`
     p{
         font-size: 0.875rem;
     }
-    span {
-        cursor: pointer;
-        &:hover svg {
-            color: ${props => props.theme.colors.color_600};
-        }
-    }
-    
     div {
         border-width: 0px 1px 0px 0px;
         border: 1px dotted ${props => props.theme.texts.text_600};
@@ -23,6 +16,16 @@ export const Votes = styled.div`
         min-height: 8px;
     }
 `
+
+export const VoteButton = styled.span<{ disabled?: boolean }>`
+    cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+    opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+    transition: opacity 0.2s ease;
+
+    &:hover {
+        opacity: ${({ disabled }) => (disabled ? 0.5 : 0.8)};
+    }
+`;
 
 export const Content = styled.div`
     flex: 1;
@@ -52,24 +55,25 @@ export const Info = styled.div`
             color: ${props => props.theme.texts.text_800};
         }
     }
+`
 
-    span {
-        line-height: 0;
-        padding: 3px;
-        margin-left: 2px;
-        &:hover svg {
+export const DeleteButton = styled.span<{ disabled?: boolean }>`
+    cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+    opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+    transition: opacity 0.2s ease;
+    line-height: 0;
+    padding: 3px;
+    margin-left: 2px;
+    &:hover svg {
             color: ${props => props.theme.colors.color_600};
-        }
     }
-
-    span:hover {
-        cursor: pointer;
+    &:hover {
         border-radius: 4px;
         background: ${props => props.theme.colors.color_200};
     }
-`
+`;
 
-export const Titulo = styled.div`
+export const Title = styled.div`
     font-size: 2rem;
 `
 

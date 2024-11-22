@@ -28,8 +28,7 @@ export function newEncrypt(data: string) {
     let encrypted = cipher.update(data, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return {
-        a: iv,
-        iv: iv.toString('hex'),
-        encryptedData: encrypted
+        iv: iv.toString('hex') as string,
+        encryptedData: encrypted as string
     };
 }

@@ -1,108 +1,131 @@
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale/pt-BR";
-import { CaretDown, CaretUp, Trash } from "phosphor-react";
-import React, {
-    ChangeEvent, FormEvent, InvalidEvent, useEffect, useState
-} from "react";
-import api from "../../services/api";
-import { Posts } from "../Home";
-import {
-    Content, CreateComment, CreateReplay, Info, Titulo,
-    Votes
-} from "./styles";
-
-import { Container, Post } from "../../styles/global";
-
-interface PostDetails extends Posts {
-    comments: Comment[];
-}
-
-interface Comment {
-    id: string;
-    content: string;
-    asfCoins: number;
-    createAt: Date;
-    postId: string;
-    parentCommentId: string | null;
-    replies: Comment[];
-}
+import React, { ChangeEvent, FormEvent, InvalidEvent, useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale/pt-BR';
+import { usePosts } from '../../components/PostContext';
+import { Comment } from '../../interfaces';
+import { CaretDown, CaretUp, Trash } from 'phosphor-react';
+import api from '../../services/api';
+import { Container, StyledPost } from "../../styles/global";
+import { Content, CreateComment, CreateReplay, DeleteButton, Info, Title, VoteButton, Votes } from './styles';
 
 export default function PostDetails() {
-    const [postDetails, setPostDetails] = useState<PostDetails>();
-    const [newComment, setNewComment] = useState('')
+    const userId = JSON.parse(localStorage.getItem("LoggedUserId") || "null");
+    const isLoggedIn = localStorage.getItem("LoggedStatus");
+    const token = JSON.parse(localStorage.getItem("Token") || "null");
+    const {
+        post, loading, error, fetchPostById
+    } = usePosts();
+    const [newComment, setNewComment] = useState<string>('');
     const [newReply, setNewReply] = useState<{ [key: string]: string }>({});
-
     const [openReplyBoxId, setOpenReplyBoxId] = useState<string | null>(null);
-    const [comments, setComments] = useState<Comment[]>([]);
 
-    const url = window.location.pathname;
-    const postId = url.substring(url.lastIndexOf('/') + 1);
+    const { postId } = useParams<{ postId?: string }>();
+    const navigate = useNavigate();
 
     useEffect(() => {
+        if (postId) {
+            fetchPostById(postId)
+        }
+    }, [])
+
+    useEffect(() => {
+        const loadPost = async () => {
+            if (postId) {
+                await fetchPostById(postId);
+            }
+        };
+        loadPost();
+    }, [postId]);
+
+    useEffect(() => {
+        if (error) {
+            console.log("Error loading post details.");
+            alert("Error loading post details.");
+        }
+    }, [error]);
+    if (loading) return <h1>Loading...</h1>;
+
+
+    async function handleCherishPost(event: React.MouseEvent) {
+        event.preventDefault();
         try {
-            api.get<PostDetails>(`/posts/${postId}`).then(response => {
-                setPostDetails(response.data);
+            await api.put(`/cherish/post/${postId}`, {}, {
+                params: { userId, token }
             });
-        } catch (error) {
-            console.error('Error fetching post:', error);
+        } catch (error: any) {
+            console.error('Error cherishing post:', error);
+            alert(error.response.data.message);
         }
-    }, [openReplyBoxId]);
-
-    useEffect(() => {
-        if (postDetails) {
-            setComments(postDetails.comments || []);
-        }
-    }, [postDetails]);
-
-    const fetchPostDetails = async () => {
+    }
+    async function handleCherishComment(event: React.MouseEvent, commentId: string) {
+        event.preventDefault();
         try {
-            const response = await api.get<PostDetails>(`/posts/${postId}`);
-            setPostDetails(response.data);
+            await api.put(`/cherish/comment/${commentId}`, {}, {
+                params: { userId, token }
+            })
+        } catch (error: any) {
+            console.error('Error cherishing comment:', error);
+            alert(error.response.data.message);
+        }
+    }
+
+    async function handleDepreciatePost(event: React.MouseEvent) {
+        event.preventDefault();
+        try {
+            await api.put(`depreciate/post/${postId}`, {}, {
+                params: { userId, token }
+            })
+        } catch (error: any) {
+            console.error('Error depreciating post:', error);
+            alert(error.response.data.message);
+        }
+    }
+    async function handleDepreciateComment(event: React.MouseEvent, commentId: string) {
+        event.preventDefault();
+        try {
+            await api.put(`depreciate/comment/${commentId}`, {}, {
+                params: { userId, token }
+            })
+        } catch (error: any) {
+            console.error('Error depreciating comment:', error);
+            alert(error.response.data.message);
+        }
+    }
+
+    async function handlePostDelete(event: React.MouseEvent) {
+        event.preventDefault();
+        try {
+            await api.delete(`post/${postId}`, {
+                params: { userId, token }
+            });
+            navigate('../home')
         } catch (error) {
-            console.error('Error fetching post details:', error);
+            console.error('Error deleting post:', error);
         }
     };
-
-    async function handleCherishPost(event: React.MouseEvent, postId: string) {
-        event.preventDefault;
-        await api.post(`/cherish/post/${postId}`);
-        fetchPostDetails();
-    }
-
-    async function handleCherishComment(event: React.MouseEvent, commentId: string) {
-        event.preventDefault;
-        await api.post(`/cherish/comment/${commentId}`);
-        fetchPostDetails();
-    }
-
-    async function handleDepreciatePost(event: React.MouseEvent, postId: string) {
-        event.preventDefault;
-        await api.post(`/depreciate/post/${postId}`);
-        fetchPostDetails();
-    }
-
-    async function handleDepreciateComment(event: React.MouseEvent, commentId: string) {
-        event.preventDefault;
-        await api.post(`/depreciate/comment/${commentId}`);
-        fetchPostDetails();
-    }
-
-    async function handlePostDelete(event: React.MouseEvent, postId: string) {
-        event.preventDefault;
-        await api.post(`/delete/post/${postId}`);
-        fetchPostDetails();
-        window.location.href = '/';
+    async function handleCommentDelete(event: React.MouseEvent, commentId: string) {
+        event.preventDefault();
+        try {
+            await api.delete(`/comment/${commentId}`, {
+                params: { userId, token }
+            });
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
     };
 
     async function handleNewCommentCreate(event: FormEvent) {
         event.preventDefault();
+        if (!isLoggedIn || !token) {
+            localStorage.clear();
+            alert(`Fantasmas não podem criar conteudos.`);
+            navigate('/login');
+            return;
+        }
         const content = newComment;
-        await api.post('/create/comment', { content, postId })
-
+        await api.post('/comment', { content, postId, userId, token });
         setNewComment('');
-        fetchPostDetails();
-
-        return true;
     };
     function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
         event.target.setCustomValidity('');
@@ -112,27 +135,19 @@ export default function PostDetails() {
         event.target.setCustomValidity('Esse campo é obrigatório');
     };
 
-    async function handleReplyDelete(event: React.MouseEvent, commentId: string) {
-        event.preventDefault;
-        await api.post(`/delete/comment/${commentId}`);
-        fetchPostDetails();
-    };
-
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
         event.preventDefault();
-        const newText = newReply[parentCommentId || ''];
-        setNewReply(prevState => ({
-            ...prevState,
-            [parentCommentId || '']: newText
-        }));
-        await api.post('/create/comment/sub', { content: newText, postId, parentCommentId })
-
+        if (!isLoggedIn || !token) {
+            localStorage.clear();
+            alert(`Fantasmas não podem criar conteudos.`);
+            navigate('/login');
+            return;
+        }
+        const content = newReply[parentCommentId || ''];
+        await api.post('/comment/sub', { content, postId, parentCommentId, userId, token });
         setNewReply(prevState => ({ ...prevState, [parentCommentId || '']: '' }));
-        fetchPostDetails();
         setOpenReplyBoxId(null);
-
-        return true;
-    };
+    }
     function handleNewReplyChange(event: ChangeEvent<HTMLTextAreaElement>, commentId: string) {
         event.target.setCustomValidity('');
         setNewReply(prevState => ({
@@ -151,31 +166,46 @@ export default function PostDetails() {
     const renderComments = (comments: Comment[]) => {
         return (
             comments.map(comment => (
-                <Post key={comment.id}>
+                <StyledPost key={comment.id}>
                     <Votes>
-                        <span onClick={(e) => handleCherishComment(e, comment.id)}>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || comment.user.id === userId) return;
+                            handleCherishComment(e, comment.id)
+                        }}
+                            disabled={!userId || comment.user.id === userId}
+                        >
                             <CaretUp size={20} />
-                        </span>
+                        </VoteButton>
                         <p>{comment.asfCoins}</p>
-                        <span onClick={(e) => handleDepreciateComment(e, comment.id)}>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || comment.user.id === userId) return;
+                            handleDepreciateComment(e, comment.id)
+                        }}
+                            disabled={!userId || comment.user.id === userId}
+                        >
                             <CaretDown size={20} />
-                        </span>
+                        </VoteButton>
                         <div></div>
                     </Votes>
                     <Content>
                         <Info>
                             <div>
-                                <p>Matheus Barth</p>
+                                <p>{comment.user.name}</p>
                                 <time>{
-                                    formatDistanceToNow(comment.createAt, {
+                                    formatDistanceToNow(comment.createdAt, {
                                         locale: ptBR,
                                         addSuffix: true,
                                     })
                                 }</time>
                             </div>
-                            <span onClick={(e) => handleReplyDelete(e, comment.id)}>
+                            <DeleteButton onClick={(e) => {
+                                if (!userId || comment.user.id !== userId) return;
+                                handleCommentDelete(e, comment.id)
+                            }}
+                                disabled={!userId || comment.user.id !== userId}
+                            >
                                 <Trash size={16} />
-                            </span>
+                            </DeleteButton>
                         </Info>
                         {comment.content}
                         <CreateReplay onSubmit={(event) => handleNewReplyCreate(event, comment.id)}>
@@ -204,64 +234,79 @@ export default function PostDetails() {
                         </CreateReplay>
                         {comment.replies && comment.replies.length > 0 && renderComments(comment.replies)}
                     </Content>
-                </Post>
+                </StyledPost>
             ))
         );
     };
 
     return (
         <Container>
-            {postDetails ? (
-                <>
-                    <Post key={postDetails.id}>
-                        <Votes>
-                            <span onClick={(e) => handleCherishPost(e, postDetails.id)}><CaretUp size={20} /></span>
-                            <p>{postDetails.asfCoins}</p>
-                            <span onClick={(e) => handleDepreciatePost(e, postDetails.id)}>
-                                <CaretDown size={20} />
-                            </span>
-                            <div></div>
-                        </Votes>
+            <>
+                <StyledPost key={post?.id}>
+                    <Votes>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || post?.userId === userId) return;
+                            handleCherishPost(e)
+                        }}
+                            disabled={!userId || post?.userId === userId}
+                        >
+                            <CaretUp size={20} />
+                        </VoteButton>
+                        <p>{post?.asfCoins}</p>
+                        <VoteButton onClick={(e) => {
+                            if (!userId || post?.userId === userId) return;
+                            handleDepreciatePost(e)
+                        }}
+                            disabled={!userId || post?.userId === userId}
+                        >
+                            <CaretDown size={20} />
+                        </VoteButton>
+                        <div></div>
+                    </Votes>
+                    <Content>
+                        <Info>
+                            <div>
+                                <p>{post?.user.name}</p>
+                                <time>{post ?
+                                    formatDistanceToNow(post.createdAt, {
+                                        locale: ptBR,
+                                        addSuffix: true
+                                    }
+                                    ) : 'Date not available'}</time>
+                            </div>
+                            <DeleteButton onClick={(e) => {
+                                if (!userId || post?.userId !== userId) return;
+                                handlePostDelete(e)
+                            }}
+                                disabled={!userId || post?.userId !== userId}
+                            >
+                                <Trash size={16} />
+                            </DeleteButton>
+                        </Info>
+                        <Title>
+                            {post?.title}
+                        </Title>
                         <Content>
-                            <Info>
-                                <div>
-                                    <p>Matheus Barth</p>
-                                    <time>{
-                                        formatDistanceToNow(postDetails.createdAt, {
-                                            locale: ptBR,
-                                            addSuffix: true,
-                                        })
-                                    }</time>
-                                </div>
-                                <span onClick={(e) => handlePostDelete(e, postDetails.id)}><Trash size={16} /></span>
-                            </Info>
-                            <Titulo>
-                                {postDetails.title}
-                            </Titulo>
-                            <Content>
-                                {postDetails.content}
-                            </Content>
+                            {post?.content}
                         </Content>
-                    </Post>
-                    <CreateComment onSubmit={handleNewCommentCreate}>
-                        <strong>Deixe um comentário</strong>
-                        <textarea
-                            name="comment"
-                            placeholder="Deixe um comentário"
-                            value={newComment}
-                            onChange={handleNewCommentChange}
-                            onInvalid={handleNewCommentInvalid}
-                            required
-                        ></textarea>
-                        <footer>
-                            <button type="submit">Responder</button>
-                        </footer>
-                    </CreateComment>
-                </>
-            ) : (
-                <h1>loading or missing Post.</h1>
-            )}
-            {postDetails?.comments && renderComments(postDetails.comments)}
+                    </Content>
+                </StyledPost>
+                <CreateComment onSubmit={handleNewCommentCreate}>
+                    <strong>Deixe um comentário</strong>
+                    <textarea
+                        name="comment"
+                        placeholder="Deixe um comentário"
+                        value={newComment}
+                        onChange={handleNewCommentChange}
+                        onInvalid={handleNewCommentInvalid}
+                        required
+                    ></textarea>
+                    <footer>
+                        <button type="submit">Responder</button>
+                    </footer>
+                </CreateComment>
+            </>
+            {post?.comments && renderComments(post.comments)}
         </Container>
     );
 }

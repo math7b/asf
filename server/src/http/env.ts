@@ -1,4 +1,7 @@
+import dotenv from 'dotenv'
 import { z } from 'zod'
+
+dotenv.config()
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
@@ -7,3 +10,5 @@ const envSchema = z.object({
 })
 
 export const env = envSchema.parse(process.env)
+
+console.log(env)

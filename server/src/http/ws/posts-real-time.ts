@@ -1,0 +1,15 @@
+import { FastifyInstance } from "fastify";
+import { pubSub } from "../../utils/pub-sub";
+
+export async function postRoutes(app: FastifyInstance) {
+    app.get('/realtime/posts/:postId', { websocket: true }, (connection) => {
+        pubSub.subscribe('postdetails', (message) => {
+            connection.send(JSON.stringify(message));
+        });
+    });
+    app.get('/realtime/user/:userId', { websocket: true }, (connection) => {
+        pubSub.subscribe('userdetails', (message) => {
+            connection.send(JSON.stringify(message));
+        });
+    });
+}

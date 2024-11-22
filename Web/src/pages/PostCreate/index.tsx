@@ -1,26 +1,49 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { Container } from "../../styles/global";
+import { Container, CustonInput } from "../../styles/global";
 import {
-    Buttons, Content, CustonInput,
+    Buttons, Content,
     Option, PostForm, Title
 } from "./styles";
+import { useUser } from "../../components/UserContext";
 
 export default function PostCreate() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [option, setOption] = useState('');
 
+    const {loggedUserData} = useUser();
+    
+    const navigate = useNavigate();
+
+    const isLoggedIn = localStorage.getItem("LoggedStatus");
+    const token = JSON.parse(localStorage.getItem("Token") || "null");
+
     async function handleNewPostCreate(event: FormEvent) {
         event.preventDefault();
-        const response = await api.post('/create/post', { title, content, option });
-
-        setTitle('');
-        setContent('');
-        setOption('');
-
-        window.location.href = '/';
+        if (!isLoggedIn || !token) {
+            localStorage.clear();
+            alert(`Fantasmas não podem criar conteudos.`);
+            navigate('/login');
+            return;
+        }
+        const userId = loggedUserData?.id;
+        try {
+            await api.post('/post', { title, content, option, userId, token });
+            setTitle('');
+            setContent('');
+            setOption('');
+            navigate('/home');
+        } catch (error) {
+            console.log("Error creating the post.", {
+                Title: title,
+                Content: content,
+                Option: option,
+                UserId: userId,
+                Token: token
+            }, error);
+        }
     };
 
     const handleNewTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +63,6 @@ export default function PostCreate() {
         <Container>
             <PostForm onSubmit={handleNewPostCreate}>
                 <h1>Publicar nova postagem</h1>
-
                 <Title>
                     <label htmlFor="postTitle">Titul da postagem</label>
                     <CustonInput
@@ -50,7 +72,6 @@ export default function PostCreate() {
                         required
                     />
                 </Title>
-
                 <Content>
                     <label htmlFor="postContent">Conteudo da postagem</label>
                     <textarea
@@ -62,9 +83,7 @@ export default function PostCreate() {
                         required
                     ></textarea>
                 </Content>
-
                 <p>Tipo da postagem</p>
-
                 <Option>
                     <input
                         type="radio"
@@ -111,7 +130,7 @@ export default function PostCreate() {
                 </Option>
 
                 <Buttons>
-                    <Link to={"/"}>
+                    <Link to={"/home"}>
                         <button>
                             Cancelar
                         </button>

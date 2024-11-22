@@ -1,48 +1,81 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import api from "../../services/api";
 import {
-    Container, Content, Info, Post, Posts, Title
+    Container, Content, Info, Menu, MenuItem, StyledPost, StyledPosts, Title
 } from "./styles";
-
-export interface Posts {
-    id: string;
-    title: string;
-    content: String;
-    asfCoins: number;
-    createdAt: string;
-    option: String;
-}
+import { Post } from "../../interfaces";
+import { usePosts } from "../../components/PostContext";
+import { useEffect, useState } from "react";
+import flower from '../../assets/flower.jpg';
 
 export default function Home() {
-    const [posts, setPosts] = useState<Posts[]>([]);
+    const [menuOption, setMenuOption] = useState('all');
+
+    const { posts, loading, error } = usePosts();
 
     useEffect(() => {
-        api.get<Posts[]>('/posts').then(response => {
-            setPosts(response.data);
-        });
-    }, []);
-    console.log(posts);
+        if (error) {
+            console.log("Error loading post details.");
+            alert("Error loading post details.");
+        }
+    }, [error]);
+    if (loading) return <p>Loading posts...</p>;
 
-    if (!posts) {
-        return <div>loading...</div>
-    }
-    
+    function handleToggleMenuOption(menuOption: string) {
+        setMenuOption(menuOption);
+    };
+
+    const filteredPosts = menuOption === "all" ? posts : posts.filter(post => post.option === menuOption);
+
     return (
         <Container>
-            <Posts>
-                {posts.map(post => {
-                    return (
-                        <Post key={post.id}>
-                            <Link to={`posts/${post.id}`}>
+            <Menu>
+                <MenuItem isActive={menuOption === "all"}
+                    onClick={() => handleToggleMenuOption("all")}>
+                    Home
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "event"}
+                    onClick={() => handleToggleMenuOption("event")}>
+                    Eventos
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "help"}
+                    onClick={() => handleToggleMenuOption("help")}>
+                    Ajuda
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "question"}
+                    onClick={() => handleToggleMenuOption("question")}>
+                    Duvidas
+                </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "curiosity"}
+                    onClick={() => handleToggleMenuOption("curiosity")}>
+                    Curiosidades
+                </MenuItem>
+            </Menu>
+            <StyledPosts>
+                {filteredPosts.length > 0 ? (
+                    filteredPosts.map((post: Post) => (
+                        <StyledPost key={post.id}>
+                            <Link to={`../posts/${post.id}`}>
                                 <div>
                                     <Content>
                                         <Title>
+                                            <p>{
+                                                post.option === "event" ? "[Eventos]" :
+                                                    post.option === "help" ? "[Ajuda]" :
+                                                        post.option === "question" ? "[Duvidas]" :
+                                                            post.option === "curiosity" ? "[Curiosidades]" :
+                                                                null
+                                            }</p>
                                             <p>{post.title}</p>
                                         </Title>
                                         <Info>
+                                            {post.user.beeKeeper!==null ? <p>Apicultor</p> : null}
+                                            <p>{post.user?.name}</p>
                                             <p>{post.asfCoins} Coins</p>
                                             <time>{
                                                 formatDistanceToNow(post.createdAt, {
@@ -52,22 +85,13 @@ export default function Home() {
                                             }</time>
                                         </Info>
                                     </Content>
-                                    <img src={
-                                        `src/assets/${
-                                            post.option === "event" ? "event.jpg" :
-                                            post.option === "help" ? "help.jpg" :
-                                            post.option === "question" ? "question.jpg" :
-                                            post.option === "curiosity" ? "curiosity.jpg" : 
-                                            "event.jpg"
-                                        }`}
-                                        alt=""
-                                    />
+                                    <img src={flower} alt="" />
                                 </div>
                             </Link>
-                        </Post>
-                    )
-                })}
-            </Posts>
+                        </StyledPost>
+                    ))
+                ) : <p>Sem postagens</p>}
+            </StyledPosts>
         </Container>
     );
 }

@@ -1,28 +1,79 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
+import { verifyToken } from "../token";
+import { pubSub } from "../../utils/pub-sub";
 
 export async function depreciateComment(app: FastifyInstance) {
-    app.post('/depreciate/comment/:commentId', async (request, reply) => {
-        const cherishCommentParams = z.object({
+    app.put('/depreciate/comment/:commentId', async (request, reply) => {
+        const zCommentId = z.object({
             commentId: z.string().uuid(),
-            userId: z.string(),
         })
-
-        const { commentId, userId } = cherishCommentParams.parse(request.params)
-
+        const zCommentQuery = z.object({
+            userId: z.string(),
+            token: z.string(),
+        })
+        const { commentId } = zCommentId.parse(request.params)
+        const { userId, token } = zCommentQuery.parse(request.query)
+        const verifyedToken = verifyToken(token);
+        if (!verifyedToken.valid) {
+            return reply.status(400).send({ message: "Not authorized" });
+        }
+        const getCommentCreator = await prisma.comment.findUnique({
+            where: {
+                id: commentId
+            },
+            select: {
+                userId: true
+            }
+        })
+        if (getCommentCreator?.userId === userId) {
+            return reply.status(400).send({ message: "O criador não pode desvalorizar a propria postagem." })
+        }
+        const getASFCoinsOfCheirisherUser = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                asfCoins: true
+            }
+        })
+        if (getASFCoinsOfCheirisherUser === null || getASFCoinsOfCheirisherUser?.asfCoins < 2) {
+            return reply.status(400).send({ message: "Apreciação não altorizada, falta moedas." })
+        }
         await prisma.comment.update({
             where: {
-                id: commentId,
-                userId: userId,
+                id: commentId
             },
             data: {
                 asfCoins: {
-                    decrement: 1,
+                    decrement: 1
                 },
             },
         })
-
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                asfCoins: {
+                    decrement: 2
+                }
+            },
+        })
+        await prisma.user.update({
+            where: {
+                id: getCommentCreator?.userId
+            },
+            data: {
+                asfCash: {
+                    decrement: 1
+                }
+            }
+        })
+        const commentCreator = getCommentCreator?.userId;
+        pubSub.publish('postdetails', { action: "depreciate", type: "comment", data: { commentId } })
+        pubSub.publish('userdetails', { action: "depreciate", type: "comment", data: { commentId, userId, commentCreator } })
         return reply.status(201).send();
     })
 }

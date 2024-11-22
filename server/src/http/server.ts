@@ -1,5 +1,6 @@
 import cors from '@fastify/cors'
 import { fastify } from 'fastify'
+import websocket from '@fastify/websocket'
 
 import { cherishComment } from './routes/cherish-comment'
 import { cherishPost } from './routes/cherish-post'
@@ -17,9 +18,11 @@ import { getPosts } from './routes/get-posts'
 import { createUser } from './routes/create-user'
 import { createBeeKeeper } from './routes/create-beeKeeper'
 import { logon } from './routes/user-logon'
+import { postRoutes } from './ws/posts-real-time'
+import { getUser } from './routes/get-user'
 
 const app = fastify()
-
+app.register(websocket)
 app.register(cors)
 
 app.register(getPost)
@@ -38,8 +41,11 @@ app.register(cherishComment)
 app.register(depreciatePost)
 app.register(depreciateComment)
 app.register(logon)
+app.register(getUser)
+
+app.register(postRoutes)
 
 const port = 3333;
-app.listen({ port }).then(() => {
+app.listen({ host: '0.0.0.0', port: port }).then(() => {
     console.log({ Message: 'HTTP Server running!', Port: port })
 })
