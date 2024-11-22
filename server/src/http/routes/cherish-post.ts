@@ -1,9 +1,8 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
-import { verifyToken } from "../token";
 import { pubSub } from "../../utils/pub-sub";
-import { decrypt } from "dotenv";
+import { verifyToken } from "../token";
 
 export async function cherishPost(app: FastifyInstance) {
     app.put('/cherish/post/:postId', async (request, reply) => {
@@ -29,7 +28,7 @@ export async function cherishPost(app: FastifyInstance) {
             }
         })
         if (getPostCreator?.userId === userId) {
-            return reply.status(400).send({ message: "O criador não pode valorizar a propria postagem." })
+            return reply.status(400).send({ message: "O criador não pode valorizar a propria postagem" })
         }
         const getASFCoinsOfCheirisherUser = await prisma.user.findUnique({
             where: {
@@ -40,19 +39,19 @@ export async function cherishPost(app: FastifyInstance) {
             }
         })
         if (getASFCoinsOfCheirisherUser === null || getASFCoinsOfCheirisherUser?.asfCoins < 2) {
-            return reply.status(400).send({ message: "Apreciação não altorizada, falta moedas." })
+            return reply.status(400).send({ message: "Apreciação não altorizada, falta moedas" })
         }
         await prisma.post.update({
             where: {
                 id: postId
             },
             data: {
-                asfCoins: {
+                value: {
                     increment: 1
-                },
-            },
+                }
+            }
         })
-        const updateASFCoinsAndGeIV = await prisma.user.update({
+        await prisma.user.update({
             where: {
                 id: userId
             },
@@ -75,7 +74,7 @@ export async function cherishPost(app: FastifyInstance) {
                 }
             }
         })
-        pubSub.publish('postdetails', { action: "cherish", type: "post", data: { postId, userId } })
+        pubSub.publish('postdetails', { action: "cherish", type: "post", data: { postId } })
         pubSub.publish('userdetails', { action: "cherish", type: "post", data: { userId } })
         return reply.status(201).send();
     })

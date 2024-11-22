@@ -1,24 +1,33 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../../components/UserContext";
 import api from "../../services/api";
 import { Container, CustonInput } from "../../styles/global";
 import {
     Buttons, Content,
-    Option, PostForm, Title
+    CustonSelect,
+    Event,
+    PostForm, Title
 } from "./styles";
-import { useUser } from "../../components/UserContext";
 
 export default function PostCreate() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [option, setOption] = useState('');
+    const [state, setState] = useState('');
 
-    const {loggedUserData} = useUser();
-    
+    const { loggedUserData } = useUser();
+
     const navigate = useNavigate();
 
     const isLoggedIn = localStorage.getItem("LoggedStatus");
     const token = JSON.parse(localStorage.getItem("Token") || "null");
+
+
+    // Handle event state change (for the 'event' option)
+    const handleEventStateChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setState(event.target.value);
+    };
 
     async function handleNewPostCreate(event: FormEvent) {
         event.preventDefault();
@@ -30,16 +39,18 @@ export default function PostCreate() {
         }
         const userId = loggedUserData?.id;
         try {
-            await api.post('/post', { title, content, option, userId, token });
+            await api.post('/post', { title, content, option, state, userId, token });
             setTitle('');
             setContent('');
             setOption('');
             navigate('/home');
-        } catch (error) {
+        } catch (error: any) {
+            alert(error.response.data.message);
             console.log("Error creating the post.", {
                 Title: title,
                 Content: content,
                 Option: option,
+                State: state,
                 UserId: userId,
                 Token: token
             }, error);
@@ -55,8 +66,11 @@ export default function PostCreate() {
         setContent(event.target.value);
     };
 
-    const handleOptionChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleOptionChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setOption(event.target.value);
+        if (option !== "event") {
+            setState('')
+        }
     };
 
     return (
@@ -84,50 +98,30 @@ export default function PostCreate() {
                     ></textarea>
                 </Content>
                 <p>Tipo da postagem</p>
-                <Option>
-                    <input
-                        type="radio"
-                        id="event"
-                        name="postOption"
-                        value="event"
-                        checked={option === "event"}
-                        onChange={handleOptionChange}
-                    />
-                    <label htmlFor="event">Evento</label>
-                </Option>
-                <Option>
-                    <input
-                        type="radio"
-                        id="help"
-                        name="postOption"
-                        value="help"
-                        checked={option === "help"}
-                        onChange={handleOptionChange}
-                    />
-                    <label htmlFor="help">Ajuda</label>
-                </Option>
-                <Option>
-                    <input
-                        type="radio"
-                        id="question"
-                        name="postOption"
-                        value="question"
-                        checked={option === "question"}
-                        onChange={handleOptionChange}
-                    />
-                    <label htmlFor="question">Pergunta</label>
-                </Option>
-                <Option>
-                    <input
-                        type="radio"
-                        id="curiosity"
-                        name="postOption"
-                        value="curiosity"
-                        checked={option === "curiosity"}
-                        onChange={handleOptionChange}
-                    />
-                    <label htmlFor="curiosity">Curiosidade</label>
-                </Option>
+                <CustonSelect
+                    value={option}
+                    onChange={handleOptionChange}
+                    style={{ padding: '8px', fontSize: '14px' }}
+                >
+                    <option value="" disabled hidden>
+                        Selecione o tipo de postagem
+                    </option>
+                    <option value="event">Evento</option>
+                    <option value="help">Ajuda</option>
+                    <option value="question">Pergunta</option>
+                    <option value="curiosity">Curiosidade</option>
+                </CustonSelect>
+                {option === "event" && (
+                    <Event>
+                        <label htmlFor="state">Estado do Evento:</label>
+                        <CustonInput
+                            type="text"
+                            id="state"
+                            value={state}
+                            onChange={handleEventStateChange}
+                        />
+                    </Event>
+                )}
 
                 <Buttons>
                     <Link to={"/home"}>

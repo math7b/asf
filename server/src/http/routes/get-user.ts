@@ -1,9 +1,9 @@
-import z from "zod"
-import { verifyToken } from "../token"
 import { FastifyInstance } from "fastify"
+import z from "zod"
 import { prisma } from "../../lib/prisma"
-import { decrypt } from "../encrypt"
 import { User } from "../../utils/pub-sub"
+import { decrypt } from "../encrypt"
+import { verifyToken } from "../token"
 
 export async function getUser(app: FastifyInstance) {
     app.get('/user', async (request, reply) => {
@@ -14,7 +14,7 @@ export async function getUser(app: FastifyInstance) {
         const verifyedToken = verifyToken(token)
         console.log(verifyedToken)
         if (!verifyedToken.valid) {
-            return reply.status(400).send({ message: "Not authorized" });
+            return reply.status(400).send({ message: "Coneção não autorizada" });
         }
         const userId = verifyedToken.decoded?.id
         console.log(userId)
@@ -46,7 +46,7 @@ export async function getUser(app: FastifyInstance) {
             }
         })
         if (!getUserIV) {
-            return reply.status(400).send({ message: "Usuario não posue uma chave de verificação" });
+            return reply.status(400).send({ message: "Usuario não possue uma chave de verificação" });
         }
         if (data.beeKeeper) {
             data.beeKeeper = {
@@ -55,7 +55,7 @@ export async function getUser(app: FastifyInstance) {
                 phoneNumber: decrypt(data.beeKeeper.phoneNumber, getUserIV.iv),
                 RG: decrypt(data.beeKeeper.RG, getUserIV.iv),
                 CPF: decrypt(data.beeKeeper.CPF, getUserIV.iv),
-            };
+            }
         }
         return reply.status(200).send({
             Data: data

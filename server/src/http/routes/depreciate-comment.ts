@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
-import { verifyToken } from "../token";
 import { pubSub } from "../../utils/pub-sub";
+import { verifyToken } from "../token";
 
 export async function depreciateComment(app: FastifyInstance) {
     app.put('/depreciate/comment/:commentId', async (request, reply) => {
@@ -17,7 +17,7 @@ export async function depreciateComment(app: FastifyInstance) {
         const { userId, token } = zCommentQuery.parse(request.query)
         const verifyedToken = verifyToken(token);
         if (!verifyedToken.valid) {
-            return reply.status(400).send({ message: "Not authorized" });
+            return reply.status(400).send({ message: "Não autorizado" });
         }
         const getCommentCreator = await prisma.comment.findUnique({
             where: {
@@ -46,10 +46,10 @@ export async function depreciateComment(app: FastifyInstance) {
                 id: commentId
             },
             data: {
-                asfCoins: {
+                value: {
                     decrement: 1
-                },
-            },
+                }
+            }
         })
         await prisma.user.update({
             where: {
@@ -59,7 +59,7 @@ export async function depreciateComment(app: FastifyInstance) {
                 asfCoins: {
                     decrement: 2
                 }
-            },
+            }
         })
         await prisma.user.update({
             where: {

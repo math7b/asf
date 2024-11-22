@@ -1,4 +1,4 @@
-import styled, { createGlobalStyle } from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
     :focus {
@@ -84,4 +84,7 @@ export const CustonInput = styled.input`
     padding: 0.5rem;
     border: 1px solid #767676;
     border-radius: 8px;
+    &:focus {
+        border: 1px solid ${props => props.theme.colors.color_600};
+    }
 `;

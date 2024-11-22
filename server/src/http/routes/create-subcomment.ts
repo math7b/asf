@@ -1,9 +1,8 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
-import { verifyToken } from "../token";
 import { pubSub } from "../../utils/pub-sub";
-import { decrypt } from "dotenv";
+import { verifyToken } from "../token";
 
 export async function createSubComment(app: FastifyInstance) {
     app.post('/comment/sub', async (request, reply) => {
@@ -17,11 +16,11 @@ export async function createSubComment(app: FastifyInstance) {
         const { content, postId, parentCommentId, userId, token } = createCommentBody.parse(request.body);
         const verifiedToken = verifyToken(token);
         if (!verifiedToken.valid) {
-            return reply.status(400).send({ message: "Not authorized" });
+            return reply.status(400).send({ message: "Não autorizado" });
         }
         const data: any = {
             content,
-            asfCoins: 2,
+            value: 2,
             post: {
                 connect: {
                     id: postId,
@@ -30,14 +29,14 @@ export async function createSubComment(app: FastifyInstance) {
             user: {
                 connect: {
                     id: userId,
-                },
-            },
+                }
+            }
         };
         if (parentCommentId) {
             data.parentComment = {
                 connect: {
                     id: parentCommentId,
-                },
+                }
             };
         }
         const subCommentCreate = await prisma.comment.create({
@@ -51,14 +50,14 @@ export async function createSubComment(app: FastifyInstance) {
             select: {
                 id: true,
                 content: true,
-                asfCoins: true,
+                value: true,
                 createdAt: true,
                 postId: true,
                 replies: {
                     select: {
                         id: true,
                         content: true,
-                        asfCoins: true,
+                        value: true,
                         createdAt: true,
                         postId: true,
                         replies: true,
@@ -76,7 +75,7 @@ export async function createSubComment(app: FastifyInstance) {
                         registeredAt: true,
                         beeKeeper: true,
                     }
-                },  
+                }
             }
         })
         if (!comment) {
@@ -92,7 +91,7 @@ export async function createSubComment(app: FastifyInstance) {
                 }
             }
         })
-        pubSub.publish('postdetails', { action: 'create', type: 'comment', data: { comment, userId } })
+        pubSub.publish('postdetails', { action: 'create', type: 'comment', data: { comment } })
         pubSub.publish('userdetails', { action: 'create', type: 'comment', data: { userId } })
         return reply.status(201).send();
     });

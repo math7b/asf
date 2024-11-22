@@ -4,9 +4,10 @@ export const HeaderContainer = styled.div`
     display: flex;
     align-items: start;
     justify-content: space-between;
+    flex-wrap: wrap;
     background: ${props => props.theme.colors.color_400};
     margin-bottom: 8vh;
-    height: 11vh;
+    height: 4rem;
     div {
         display: flex;
         margin-right:16px;
@@ -32,15 +33,18 @@ export const Logo = styled.div`
     flex-direction: row;
     align-items: center;
     a img {
-        width: 14vh;  /* A largura pode ser ajustada conforme necessário */
+        width: 6rem;
         height: auto;
-        position: relative;
-        top: 3vh; /* Ajuste a quantidade conforme necessário */
-        left: -3vh; /* Ajuste a quantidade conforme necessário */
+        margin-top: 60px;
+        margin-left: -20px;
+        /* position: relative;
+        top: 4vh;
+        left: -2vw; */
     }
     p {
-        position: relative;
-        left: -6vh;
+        /* position: relative; */
+        /* left: -3vw; */
+        margin-left: -10px;
         font-size: 0.75rem;
     }
 `;

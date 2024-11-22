@@ -1,24 +1,23 @@
-// Header.tsx
-import { Link } from 'react-router-dom';
 import { Plus } from 'phosphor-react';
-import logoLight from '../../assets/logo-light.png';
-import { ASFCash, ASFCoins, Coins, HeaderContainer, Logo } from './styles';
 import { useEffect, useState } from 'react';
-import { usePosts } from '../PostContext';
+import { Link } from 'react-router-dom';
+import logoLight from '../../assets/logo-light.png';
 import { useUser } from '../UserContext';
+import { ASFCash, ASFCoins, Coins, HeaderContainer, Logo } from './styles';
 
 export function Header() {
     const [isLoggedIn, setLoggedId] = useState<string | null>(null);
 
-    const { loggedUserData } = useUser();
+    const { loggedUserData, logout } = useUser();
 
     useEffect(() => {
         const loggedStatus = localStorage.getItem("LoggedStatus");
-        setLoggedId(loggedStatus);  // set the state based on localStorage
-    }, []); // empty dependency array ensures this runs only once
+        setLoggedId(loggedStatus);
+    }, []);
     const handleLogout = () => {
-        localStorage.clear();  // clear localStorage
-        setLoggedId(null);  // update state to reflect logged-out status
+        localStorage.clear();
+        setLoggedId(null);
+        logout();
     };
 
     return (

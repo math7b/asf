@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
-import { connect } from "http2";
 import { encrypt } from "../encrypt";
 
 export async function createBeeKeeper(app: FastifyInstance) {
@@ -25,7 +24,7 @@ export async function createBeeKeeper(app: FastifyInstance) {
             }
         })
         if(!getIV){
-            return reply.status(400).send({ message: "User don't have a key!" });
+            return reply.status(400).send({ message: "O usuario não possue uma chave privada" });
         }
         const encryptedCity = encrypt(city, getIV.iv)
         const encryptedPhoneNumber = encrypt(phoneNumber, getIV.iv)

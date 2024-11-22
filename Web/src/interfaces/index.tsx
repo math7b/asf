@@ -1,7 +1,7 @@
 export interface Comment {
     id: string;
     content: string;
-    asfCoins: number;
+    value: number;
     createdAt: string;
     postId: string;
     replies?: Comment[];
@@ -13,10 +13,11 @@ export interface Post {
     id: string;
     title: string;
     content: string;
-    asfCoins: number;
+    option: string;
+    value: number;
+    state?: string;
     createdAt: string;
     postId: string;
-    option: string;
     comments: Comment[];
     user: UsersData;
     userId: string;
@@ -26,10 +27,11 @@ export interface SinglePost {
     id: string;
     title: string;
     content: string;
-    asfCoins: number;
+    option: string;
+    value: number;
+    state?: string;
     createdAt: string;
     postId: string;
-    option: string;
     comments: Comment[];
     user: UsersData;
     userId: string;
@@ -85,8 +87,9 @@ export interface PostsContextType {
 }
 
 export interface UserContextType {
-    updateLoggedUserData: (data: LoggedUser) => void;
     loggedUserData: LoggedUser | null;
+    updateLoggedUserData: (data: LoggedUser) => void;
+    logout: () => void;
 }
 
 export interface PostsState {

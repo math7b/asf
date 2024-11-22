@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
-import { verifyToken } from "../token";
 import { pubSub } from "../../utils/pub-sub";
+import { verifyToken } from "../token";
 
 export async function deleteComment(app: FastifyInstance) {
     app.delete('/comment/:commentId', async (request, reply) => {
@@ -17,10 +17,21 @@ export async function deleteComment(app: FastifyInstance) {
         const { userId, token } = zCommentBody.parse(request.query)
         const verifiedToken = verifyToken(token);
         if (!verifiedToken.valid) {
-            return reply.status(400).send({ message: "Not authorized" });
+            return reply.status(400).send({ message: "Não autorizado" });
         }
         if (!commentId) {
-            return reply.status(404).send({ message: "Error deleting the comment" });
+            return reply.status(404).send({ message: "Commentario não encontrado" });
+        }
+        const getCommentCreatorId = await prisma.comment.findFirst({
+            where: {
+                id: commentId,
+            },
+            select: {
+                userId: true,
+            }
+        })
+        if (getCommentCreatorId?.userId !== userId) {
+            return reply.status(400).send({message: "Apenas o criador do commentario pode deletar"})
         }
         const deleteReplies = async (id: string) => {
             const replies = await prisma.comment.findMany({
@@ -34,7 +45,7 @@ export async function deleteComment(app: FastifyInstance) {
                 where: {
                     parentCommentId: id,
                     userId: userId,
-                },
+                }
             });
         };
         await deleteReplies(commentId);
@@ -42,8 +53,8 @@ export async function deleteComment(app: FastifyInstance) {
             where: {
                 id: commentId,
                 userId: userId,
-            },
-        })
+            }
+        });
         pubSub.publish('postdetails', { action: 'delete', type: 'comment', data: { commentId, userId } })
         return reply.status(201).send()
     })

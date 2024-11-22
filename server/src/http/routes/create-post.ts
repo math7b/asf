@@ -1,9 +1,8 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
+import { pubSub } from "../../utils/pub-sub";
 import { verifyToken } from "../token";
-import { Message, pubSub } from "../../utils/pub-sub";
-import { decrypt } from "dotenv";
 
 export async function createPost(app: FastifyInstance) {
     app.post('/post', async (request, reply) => {
@@ -11,26 +10,31 @@ export async function createPost(app: FastifyInstance) {
             title: z.string(),
             content: z.string(),
             option: z.string(),
+            state: z.string().optional(),
             userId: z.string(),
             token: z.string(),
         })
-        const { title, content, option, userId, token } = createPost.parse(request.body)
+        const { title, content, option, state, userId, token } = createPost.parse(request.body)
         const verifyedToken = verifyToken(token);
         if (!verifyedToken.valid) {
-            return reply.status(400).send({ message: "Not authorized" });
+            return reply.status(400).send({ message: "Não autorizado" });
+        }
+        if ((option === "event") && (state === '')) {
+            return reply.status(400).send({ message: "Eventos deve estar associado a um estado para fins de divuldação a outros usuarios" })
         }
         const postCreated = await prisma.post.create({
             data: {
                 title,
                 content,
-                asfCoins: 4,
                 option,
+                state,
+                value: 4,
                 user: {
                     connect: {
                         id: userId,
                     }
-                },
-            },
+                }
+            }
         })
         const post = await prisma.post.findUnique({
             where: {
@@ -40,7 +44,7 @@ export async function createPost(app: FastifyInstance) {
                 id: true,
                 title: true,
                 content: true,
-                asfCoins: true,
+                value: true,
                 createdAt: true,
                 option: true,
                 comments: true,
@@ -53,11 +57,11 @@ export async function createPost(app: FastifyInstance) {
                         registeredAt: true,
                         beeKeeper: true,
                     }
-                },
+                }
             }
         });
         if (!post) {
-            return reply.status(404).send({ message: "Post not found" });
+            return reply.status(404).send({ message: "Postagem não encontrada" });
         }
         await prisma.user.update({
             where: {
@@ -69,7 +73,7 @@ export async function createPost(app: FastifyInstance) {
                 }
             }
         })
-        pubSub.publish('postdetails', { action: 'create', type: 'post', data: { post, userId } })
+        pubSub.publish('postdetails', { action: 'create', type: 'post', data: { post } })
         pubSub.publish('userdetails', { action: 'create', type: 'post', data: { userId } })
         return reply.status(201).send()
     })

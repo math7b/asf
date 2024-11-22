@@ -1,20 +1,24 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-    flex: 1;
-    
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
+    width: 48vw;
+    margin-right: 2vw;
 `
 
 export const Menu = styled.ul`
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
     background: ${props => props.theme.colors.color_800};
     margin-bottom: 16px;
     border-radius: 4px;
-    display: inline;
     padding: 4px;
+    font-size: 0.875rem;
+    width: 48vw;
 `
 
 interface MenuItemProps {
@@ -24,7 +28,7 @@ interface MenuItemProps {
 export const MenuItem = styled.li<MenuItemProps>`
     cursor: pointer;
     display: inline;
-    padding: 6px;
+    padding: 4px;
     color: ${({ isActive, theme }) => (
         isActive ?
             theme.texts.text_300 :
@@ -34,7 +38,10 @@ export const MenuItem = styled.li<MenuItemProps>`
         color: ${props => props.theme.texts.text_100};
     }
     &:first-child {
-        margin-right: 10px;
+        margin-right: 14px;
+    }
+    &:last-child {
+        margin-left: 8vw;
     }
 `;
 
@@ -49,7 +56,6 @@ export const StyledPosts = styled.div`
 `
 
 export const StyledPost = styled.div`
-    width: 24rem;
     img {
         width: 100%;
         border-radius: 0px 0px 24px 24px;

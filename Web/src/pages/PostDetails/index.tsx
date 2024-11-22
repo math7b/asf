@@ -1,10 +1,10 @@
-import React, { ChangeEvent, FormEvent, InvalidEvent, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
+import { CaretDown, CaretUp, Trash } from 'phosphor-react';
+import React, { ChangeEvent, FormEvent, InvalidEvent, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { usePosts } from '../../components/PostContext';
 import { Comment } from '../../interfaces';
-import { CaretDown, CaretUp, Trash } from 'phosphor-react';
 import api from '../../services/api';
 import { Container, StyledPost } from "../../styles/global";
 import { Content, CreateComment, CreateReplay, DeleteButton, Info, Title, VoteButton, Votes } from './styles';
@@ -176,7 +176,7 @@ export default function PostDetails() {
                         >
                             <CaretUp size={20} />
                         </VoteButton>
-                        <p>{comment.asfCoins}</p>
+                        <p>{comment.value}</p>
                         <VoteButton onClick={(e) => {
                             if (!userId || comment.user.id === userId) return;
                             handleDepreciateComment(e, comment.id)
@@ -252,7 +252,7 @@ export default function PostDetails() {
                         >
                             <CaretUp size={20} />
                         </VoteButton>
-                        <p>{post?.asfCoins}</p>
+                        <p>{post?.value}</p>
                         <VoteButton onClick={(e) => {
                             if (!userId || post?.userId === userId) return;
                             handleDepreciatePost(e)

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Comment, Post, PostMessage, PostsContextType, SinglePost } from '../interfaces';
 import api from '../services/api';
-import { Comment, PostMessage, Post, PostsContextType, SinglePost, LoggedUser } from '../interfaces';
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
@@ -10,6 +10,7 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [fetchedPostIds, setFetchedPostIds] = useState<Set<string>>(new Set());
+    const [userSocket, setUserSocket] = useState<WebSocket | null>(null);
 
     const fetchPosts = async () => {
         setLoading(true);
@@ -24,19 +25,19 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     useEffect(() => {
-        const socket = new WebSocket(`ws://localhost:3333/realtime/posts/${post?.id}`);
-        socket.onopen = () => {
-            console.log('WebSocket connection established, postContext');
+            const socket = new WebSocket('ws://localhost:3333/realtime/posts');
+            socket.onopen = () => {
+            console.log('WebSocket connection established with postContext');
         };
         socket.onmessage = (event) => {
             const message: PostMessage = JSON.parse(event.data);
             handleMessage(message);
         };
         socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
+            console.error('postContext WebSocket error:', error);
         };
         socket.onclose = (event) => {
-            console.log('WebSocket connection closed:', event);
+            console.log('WebSocket connection with postContext closed:', event);
         };
         return () => {
             socket.close();
@@ -143,12 +144,12 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     const postId = message.data.postId;
                     setPosts((prevPosts) =>
                         prevPosts.map((post) =>
-                            post.id === postId ? { ...post, asfCoins: post.asfCoins + 1 } : post
+                            post.id === postId ? { ...post, value: post.value + 1 } : post
                         )
                     );
                     setPost((prevPost) => {
                         if (prevPost && prevPost.id === postId) {
-                            return { ...prevPost, asfCoins: prevPost.asfCoins + 1 };
+                            return { ...prevPost, value: prevPost.value + 1 };
                         }
                         return prevPost;
                     });
@@ -160,7 +161,7 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             ...post,
                             comments: post.comments ? post.comments.map((comment) =>
                                 comment.id === commentId ?
-                                    { ...comment, asfCoins: comment.asfCoins + 1 } :
+                                    { ...comment, value: comment.value + 1 } :
                                     comment
                             ) : [],
                         }))
@@ -169,7 +170,7 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         if (prevPost) {
                             const updatedComments = prevPost.comments.map((comment) =>
                                 comment.id === commentId ?
-                                    { ...comment, asfCoins: comment.asfCoins + 1 } :
+                                    { ...comment, value: comment.value + 1 } :
                                     comment
                             );
                             return { ...prevPost, comments: updatedComments };
@@ -183,12 +184,12 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     const postId = message.data.postId;
                     setPosts((prevPosts) =>
                         prevPosts.map((post) =>
-                            post.id === postId ? { ...post, asfCoins: post.asfCoins - 1 } : post
+                            post.id === postId ? { ...post, value: post.value - 1 } : post
                         )
                     );
                     setPost((prevPost) => {
                         if (prevPost && prevPost.id === postId) {
-                            return { ...prevPost, asfCoins: prevPost.asfCoins - 1 };
+                            return { ...prevPost, value: prevPost.value - 1 };
                         }
                         return prevPost;
                     });
@@ -199,14 +200,14 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         prevPosts.map((post) => ({
                             ...post,
                             comments: post.comments ? post.comments.map((comment) =>
-                                comment.id === commentId ? { ...comment, asfCoins: comment.asfCoins - 1 } : comment
+                                comment.id === commentId ? { ...comment, value: comment.value - 1 } : comment
                             ) : [],
                         }))
                     );
                     setPost((prevPost) => {
                         if (prevPost) {
                             const updatedComments = prevPost.comments.map((comment) =>
-                                comment.id === commentId ? { ...comment, asfCoins: comment.asfCoins - 1 } : comment
+                                comment.id === commentId ? { ...comment, value: comment.value - 1 } : comment
                             );
                             return { ...prevPost, comments: updatedComments };
                         }
@@ -266,7 +267,7 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             loading,
             error,
             fetchPosts,
-            fetchPostById,
+            fetchPostById
         }}>
             {children}
         </PostsContext.Provider>

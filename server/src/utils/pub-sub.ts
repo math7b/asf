@@ -1,4 +1,3 @@
-import { date, number } from "zod";
 
 export type BeeKeeper = {
     id: string;
@@ -19,22 +18,36 @@ export type User = {
     beeKeeper?: BeeKeeper | null;
 };
 
+export type LoggedUser = {
+    id: string;
+    name: string;
+    email: string;
+    state: string;
+    asfCoins: number,
+    asfCash: number,
+    registeredAt: Date;
+    beeKeeper?: BeeKeeper | null;
+};
+
 export type Comment = {
     id: string;
     content: string;
-    asfCoins: number;
+    value: number;
     createdAt: Date;
-    postId: string;
-    replies?: Comment[];
-    parentCommentId?: string | null;
-    user: User;
-}
+    postId: string | null; // postId is optional, so it can be null
+    replies?: Comment[];   // replies are optional, a comment may or may not have replies
+    parentCommentId?: string | null; // parentCommentId is optional, can be null
+    userId: string; // userId is required (always associated with a user)
+    user: User; // user is required and is associated with a User
+    post?: Post | null; // post is optional and can be null
+    parentComment?: Comment | null; // parentComment is optional and can be null
+};
 
 export type Post = {
     id: string;
     title: string;
     content: string;
-    asfCoins: number;
+    value: number;
     createdAt: Date;
     option: string;
     comments?: Comment[];

@@ -33,17 +33,28 @@ export const Content = styled.div`
         margin-top: 8px;
         padding: 1rem 6rem;
         border-radius: 8px;
+        &:focus {
+            border: 1px solid ${props => props.theme.colors.color_600};
+        }
     }
 `;
 
-export const Option = styled.div`
+export const CustonSelect = styled.select`
     display: block;
-    margin-top: 0;
-    padding: 2px 4px;
-
-    input {
-        margin-right: 8px;
+    width: 50%;
+    margin-bottom: 32px;
+    padding: 0.5rem;
+    border: 1px solid #767676;
+    border-radius: 8px;
+    &:focus {
+        border: 1px solid ${props => props.theme.colors.color_600};
     }
+`;
+
+export const Event = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 50%;
 `;
 
 export const Buttons = styled.div`

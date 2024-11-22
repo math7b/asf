@@ -1,15 +1,14 @@
 import { FastifyInstance } from "fastify";
-import { any, z } from "zod";
+import { z } from "zod";
 import { prisma } from "../../lib/prisma";
-import { connect } from "http2";
+import { pubSub } from "../../utils/pub-sub";
 import { verifyToken } from "../token";
-import { Message, pubSub } from "../../utils/pub-sub";
-import { decrypt } from "dotenv";
 
 export async function createComment(app: FastifyInstance) {
     app.post('/comment', async (request, reply) => {
         const createCommentBody = z.object({
             content: z.string(),
+            state: z.string(),
             postId: z.string(),
             userId: z.string(),
             token: z.string(),
@@ -17,12 +16,12 @@ export async function createComment(app: FastifyInstance) {
         const { content, postId, userId, token } = createCommentBody.parse(request.body)
         const verifyedToken = verifyToken(token);
         if (verifyedToken.valid == false) {
-            return reply.status(400).send({ message: "Not authorized" });
+            return reply.status(400).send({ message: "Não autorizado" });
         }
         const commentCreated = await prisma.comment.create({
             data: {
                 content,
-                asfCoins: 2,
+                value: 2,
                 post: {
                     connect: {
                         id: postId,
@@ -31,8 +30,8 @@ export async function createComment(app: FastifyInstance) {
                 user: {
                     connect: {
                         id: userId,
-                    },
-                },
+                    }
+                }
             }
         })
         const comment = await prisma.comment.findUnique({
@@ -42,7 +41,7 @@ export async function createComment(app: FastifyInstance) {
             select: {
                 id: true,
                 content: true,
-                asfCoins: true,
+                value: true,
                 createdAt: true,
                 postId: true,
                 replies: true,
@@ -56,11 +55,11 @@ export async function createComment(app: FastifyInstance) {
                         registeredAt: true,
                         beeKeeper: true,
                     }
-                },
+                }
             }
         })
         if (!comment) {
-            return reply.status(404).send({ message: "Comment not found" });
+            return reply.status(404).send({ message: "Commentario não encontrado" });
         }
         await prisma.user.update({
             where: {
@@ -72,7 +71,7 @@ export async function createComment(app: FastifyInstance) {
                 }
             }
         })
-        pubSub.publish('postdetails', { action: 'create', type: 'comment', data: { comment, userId } })
+        pubSub.publish('postdetails', { action: 'create', type: 'comment', data: { comment } })
         pubSub.publish('userdetails', { action: 'create', type: 'comment', data: { userId } })
         return reply.status(201).send()
     })

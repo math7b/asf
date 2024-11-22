@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
-import { verifyToken } from "../token";
 import { pubSub } from "../../utils/pub-sub";
+import { verifyToken } from "../token";
 
 export async function depreciatePost(app: FastifyInstance) {
     app.put('/depreciate/post/:postId', async (request, reply) => {
@@ -17,7 +17,7 @@ export async function depreciatePost(app: FastifyInstance) {
         const { userId, token } = zPostQuery.parse(request.query)
         const verifyedToken = verifyToken(token);
         if (!verifyedToken.valid) {
-            return reply.status(400).send({ message: "Not authorized" });
+            return reply.status(400).send({ message: "Não autorizado" });
         }
         const getPostCreator = await prisma.post.findUnique({
             where: {
@@ -46,12 +46,12 @@ export async function depreciatePost(app: FastifyInstance) {
                 id: postId,
             },
             data: {
-                asfCoins: {
+                value: {
                     decrement: 1,
                 },
             },
         })
-        const updateASFCoinsAndGeIV = await prisma.user.update({
+        await prisma.user.update({
             where: {
                 id: userId
             },
@@ -59,9 +59,6 @@ export async function depreciatePost(app: FastifyInstance) {
                 asfCoins: {
                     decrement: 2
                 }
-            },
-            select: {
-                iv: true
             }
         })
         await prisma.user.update({

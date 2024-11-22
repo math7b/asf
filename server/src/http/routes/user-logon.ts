@@ -1,8 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
+import { LoggedUser } from "../../utils/pub-sub";
 import { decrypt, encrypt } from "../encrypt";
-import { generateToken, verifyToken } from "../token";
+import { generateToken } from "../token";
 
 export async function logon(app: FastifyInstance) {
     app.post('/logon', async (request, reply) => {
@@ -17,10 +18,10 @@ export async function logon(app: FastifyInstance) {
             }
         })
         if (!user) {
-            return reply.status(400).send({ message: "Email or password incorrect!" });
+            return reply.status(400).send({ message: "Email ou senha incorreto" });
         }
         const encryptedPassword = encrypt(password, user.iv)
-        const data = await prisma.user.findUnique({
+        const data: LoggedUser | null = await prisma.user.findUnique({
             where: {
                 email: email,
                 password: encryptedPassword,
@@ -38,7 +39,7 @@ export async function logon(app: FastifyInstance) {
             }
         })
         if (!data) {
-            return reply.status(400).send({ message: "Email or password incorrect!" });
+            return reply.status(400).send({ message: "Email ou senha incorreto" });
         }
         if (data.beeKeeper) {
             data.beeKeeper = {

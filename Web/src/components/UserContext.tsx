@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { LoggedUser, PostMessage, UserContextType, UserMessage } from '../interfaces';
 import api from '../services/api';
-import { Comment, PostMessage, LoggedUser, UserMessage, UserContextType } from '../interfaces';
-import { usePosts } from './PostContext';
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -21,6 +20,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setLoggedUserData(loggedUser);
             } catch (error) {
                 console.log('Failed to fetch user.', error);
+                localStorage.clear();
+                setLoggedUserData(null);
             }
         }
     };
@@ -30,17 +31,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const userId = loggedUserData.id;
             const socket = new WebSocket(`ws://localhost:3333/realtime/user/${userId}`);
             socket.onopen = () => {
-                console.log('WebSocket connection established, userContext');
+                console.log('WebSocket connection established with userContext');
             };
             socket.onmessage = (event) => {
                 const message: UserMessage = JSON.parse(event.data);
                 handleMessage(message);
             };
             socket.onerror = (error) => {
-                console.error('WebSocket error:', error);
+                console.error('userContext WebSocket error:', error);
             };
             socket.onclose = (event) => {
-                console.log('WebSocket connection closed:', event);
+                console.log('WebSocket connection with userContext closed:', event);
             };
             return () => {
                 socket.close();
@@ -187,14 +188,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoggedUserData(data);
     };
 
+    const logout = () => {
+        setLoggedUserData(null);
+    };
+
     useEffect(() => {
         fetchLoggedUser();
     }, []);
 
     return (
         <UserContext.Provider value={{
+            loggedUserData,
             updateLoggedUserData,
-            loggedUserData
+            logout
         }}>
             {children}
         </UserContext.Provider>

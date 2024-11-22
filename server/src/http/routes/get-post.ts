@@ -8,9 +8,7 @@ export async function getPost(app: FastifyInstance) {
         const getPostParams = z.object({
             postId: z.string().uuid(),
         })
-
         const { postId } = getPostParams.parse(request.params)
-
         const post: Post | null = await prisma.post.findUnique({
             where: {
                 id: postId,
@@ -42,11 +40,9 @@ export async function getPost(app: FastifyInstance) {
                 }
             }
         })
-
         if (!post) {
-            throw new Error("Post not found")
+            throw new Error("Postagem não encontrado")
         }
-
         if (post.comments) {
             const orderedComments = organizeComments(post.comments);
             const orderedPost = {
@@ -62,14 +58,11 @@ export async function getPost(app: FastifyInstance) {
 function organizeComments(comments: Comment[]): Comment[] {
     const commentMap: { [id: string]: Comment } = {}
     const rootComments: Comment[] = []
-
     // Create a map of comments using their IDs as keys
     comments.forEach(comment => {
         commentMap[comment.id] = comment
     })
-
     comments.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-
     // Organize comments into hierarchical structure
     comments.forEach(comment => {
         if (comment.parentCommentId !== null && comment.parentCommentId !== undefined) {
@@ -84,6 +77,5 @@ function organizeComments(comments: Comment[]): Comment[] {
             rootComments.push(comment)
         }
     })
-
     return rootComments
 }

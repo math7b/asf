@@ -1,13 +1,13 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import flower from '../../assets/flower.jpg';
+import { usePosts } from "../../components/PostContext";
+import { Post } from "../../interfaces";
 import {
     Container, Content, Info, Menu, MenuItem, StyledPost, StyledPosts, Title
 } from "./styles";
-import { Post } from "../../interfaces";
-import { usePosts } from "../../components/PostContext";
-import { useEffect, useState } from "react";
-import flower from '../../assets/flower.jpg';
 
 export default function Home() {
     const [menuOption, setMenuOption] = useState('all');
@@ -17,10 +17,8 @@ export default function Home() {
     useEffect(() => {
         if (error) {
             console.log("Error loading post details.");
-            alert("Error loading post details.");
         }
     }, [error]);
-    if (loading) return <p>Loading posts...</p>;
 
     function handleToggleMenuOption(menuOption: string) {
         setMenuOption(menuOption);
@@ -55,8 +53,14 @@ export default function Home() {
                     onClick={() => handleToggleMenuOption("curiosity")}>
                     Curiosidades
                 </MenuItem>
+                <MenuItem
+                    isActive={menuOption === "News"}
+                    onClick={() => handleToggleMenuOption("News")}>
+                    Novidades
+                </MenuItem>
             </Menu>
             <StyledPosts>
+                {loading ? 'Carregando as postagens aguarde...' : null}
                 {filteredPosts.length > 0 ? (
                     filteredPosts.map((post: Post) => (
                         <StyledPost key={post.id}>
@@ -65,18 +69,18 @@ export default function Home() {
                                     <Content>
                                         <Title>
                                             <p>{
-                                                post.option === "event" ? "[Eventos]" :
+                                                post.option === "event" ? "[Evento]" :
                                                     post.option === "help" ? "[Ajuda]" :
-                                                        post.option === "question" ? "[Duvidas]" :
-                                                            post.option === "curiosity" ? "[Curiosidades]" :
+                                                        post.option === "question" ? "[Duvida]" :
+                                                            post.option === "curiosity" ? "[Curiosidade]" :
                                                                 null
                                             }</p>
                                             <p>{post.title}</p>
                                         </Title>
                                         <Info>
-                                            {post.user.beeKeeper!==null ? <p>Apicultor</p> : null}
+                                            {post.user.beeKeeper !== null ? <p>Apicultor</p> : null}
                                             <p>{post.user?.name}</p>
-                                            <p>{post.asfCoins} Coins</p>
+                                            <p>{post.value} Coins</p>
                                             <time>{
                                                 formatDistanceToNow(post.createdAt, {
                                                     locale: ptBR,

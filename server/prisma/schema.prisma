@@ -18,12 +18,13 @@ datasource db {
 model Post {
   id String @id @default(uuid())
 
-  title     String
-  content   String
-  asfCoins  Int
-  createdAt DateTime @default(now())
+  title   String
+  content String
+  option  String //evento, ajuda, duvida, curiosidade
+  state   String?
 
-  option String //evento, ajuda, duvida, curiosidade
+  value     Int
+  createdAt DateTime @default(now())
 
   comments Comment[]
 
@@ -34,12 +35,13 @@ model Post {
 model Comment {
   id String @id @default(uuid())
 
-  content   String
-  asfCoins  Int
+  content String
+  value   Int
+
   createdAt DateTime @default(now())
 
-  post   Post   @relation(fields: [postId], references: [id])
-  postId String
+  post   Post?   @relation(fields: [postId], references: [id])
+  postId String?
 
   replies         Comment[] @relation("Replies")
   parentComment   Comment?  @relation("Replies", fields: [parentCommentId], references: [id])
