@@ -10,7 +10,6 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [fetchedPostIds, setFetchedPostIds] = useState<Set<string>>(new Set());
-    const [userSocket, setUserSocket] = useState<WebSocket | null>(null);
 
     const fetchPosts = async () => {
         setLoading(true);

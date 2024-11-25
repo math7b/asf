@@ -21,6 +21,7 @@ export const VoteButton = styled.span<{ disabled?: boolean }>`
     cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
     opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
     transition: opacity 0.2s ease;
+    line-height: 0;
 
     &:hover {
         opacity: ${({ disabled }) => (disabled ? 0.5 : 0.8)};
@@ -41,7 +42,8 @@ export const Info = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-
+    margin: auto;
+    padding: auto;
     div {
         display: flex;
         flex-direction: row;
@@ -74,38 +76,23 @@ export const DeleteButton = styled.span<{ disabled?: boolean }>`
 `;
 
 export const Title = styled.div`
-    font-size: 2rem;
-`
+    font-size: 1rem;
+`;
 
 export const Reply = styled.div`
     margin-left: 20px;
-`
+`;
 
 export const CreateComment = styled.form`
     display: flex;
     flex-direction: column;
     align-items: start;
-    
     width: 100%;
     padding-top: 1rem;
-    
     strong {
         margin-bottom: 10px;
         color: ${props => props.theme.texts.text_800};
     }
-
-    textarea {
-        width: 100%;
-        height: 150px;
-        padding: 12px 20px;
-        border-radius: 8px;
-        resize: none;
-        border: 1px solid ${props => props.theme.texts.text_300};
-        &:focus {
-            border: 0.5px solid ${props => props.theme.colors.color_600};
-        }
-    }
-
     footer {
         visibility: hidden;
         max-height: 0;
@@ -125,36 +112,34 @@ export const CreateReplay = styled.form`
     display: flex;
     flex-direction: column;
     align-items: start;
-    
     width: 100%;
     padding-top: 1rem;
     padding-left: 1rem;
-    div {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        margin-bottom: 10px;
-        width: 100%;
-
-        strong {
-            color: ${props => props.theme.texts.text_950};
-        }
-        
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            resize: none;
-            border: 1px solid ${props => props.theme.texts.text_300};
-            &:focus {
-                border: 0.5px solid ${props => props.theme.colors.color_600};
-            }
-        }
-    }
-
     button {
         margin-top: 12px;
         padding: 0.30rem 0.70rem;
     }
 `
+
+export const EditorBar = styled.div`
+    border-radius: 8px;
+    width: 100%;
+    div:first-child {
+        border: 1px solid ${props => props.theme.texts.text_500};
+        border-radius: 8px;
+    }
+    p, h2 {
+        padding: 1rem 2rem;
+        margin: 0;
+    }
+    &:focus-within {
+        border-color: ${props => props.theme.colors.color_600}; /* Change border color */
+    }
+
+    /* Targeting the children div (Toolbar and EditorContent) */
+
+    /* Apply focused border styles to the child divs when EditorContent or Toolbar is focused */
+    &:focus-within div {
+        border-color: ${props => props.theme.colors.color_600}; /* Change border color */
+    }
+`;

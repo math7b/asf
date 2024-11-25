@@ -20,6 +20,7 @@ export default {
         text_050: '#fafafa',
         text_100: '#f5f5f4',
         text_300: '#d6d3d1',
+        text_500: '#737373',
         text_600: '#525252',
         text_800: '#262626',
         text_950: '#0a0a0a',

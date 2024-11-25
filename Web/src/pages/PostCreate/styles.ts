@@ -4,14 +4,11 @@ export const PostForm = styled.form`
     display: flex;
     flex-direction: column;
     align-items: start;
-    
     width: 100%;
     padding: 1rem;
-    
     span {
         font-size: 2rem;
     }
-
     p {
         margin-bottom: 8px;
     }
@@ -26,13 +23,14 @@ export const Content = styled.div`
     margin-top: 32px;
     margin-bottom: 32px;
     width: 100%;
-
-    textarea {
-        display: block;
-        width: 100%;
-        margin-top: 8px;
-        padding: 1rem 6rem;
+    font-size: 0.875rem;
+    div:first-child {
+        border: 1px solid ${props => props.theme.texts.text_500};
         border-radius: 8px;
+        p {
+            padding: 1rem;
+            margin: 0;
+        }
         &:focus {
             border: 1px solid ${props => props.theme.colors.color_600};
         }
@@ -44,7 +42,7 @@ export const CustonSelect = styled.select`
     width: 50%;
     margin-bottom: 32px;
     padding: 0.5rem;
-    border: 1px solid #767676;
+    border: 1px solid ${props => props.theme.texts.text_500};
     border-radius: 8px;
     &:focus {
         border: 1px solid ${props => props.theme.colors.color_600};
@@ -61,15 +59,34 @@ export const Buttons = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: end;
-    
     width: 100%;
     margin-top: 32px;
-
     button {
         padding: 0.30rem 0.70rem;
     }
-
     button:not(:first-child) {
         margin-left: 1rem;
+    }
+`;
+
+export const EditorBar = styled.form`
+    border-radius: 8px;
+    div:first-child {
+        border: 1px solid ${props => props.theme.texts.text_500};
+        border-radius: 8px;
+    }
+    p, h2 {
+        padding: 1rem 2rem;
+        margin: 0;
+    }
+    &:focus-within {
+        border-color: ${props => props.theme.colors.color_600}; /* Change border color */
+    }
+
+    /* Targeting the children div (Toolbar and EditorContent) */
+
+    /* Apply focused border styles to the child divs when EditorContent or Toolbar is focused */
+    &:focus-within div {
+        border-color: ${props => props.theme.colors.color_600}; /* Change border color */
     }
 `;

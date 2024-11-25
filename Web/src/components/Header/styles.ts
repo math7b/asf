@@ -8,6 +8,10 @@ export const HeaderContainer = styled.div`
     background: ${props => props.theme.colors.color_400};
     margin-bottom: 8vh;
     height: 4rem;
+    p, h4 {
+        margin: 0;
+        padding: 0;
+    }
     div {
         display: flex;
         margin-right:16px;

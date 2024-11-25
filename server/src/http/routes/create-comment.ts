@@ -8,7 +8,6 @@ export async function createComment(app: FastifyInstance) {
     app.post('/comment', async (request, reply) => {
         const createCommentBody = z.object({
             content: z.string(),
-            state: z.string(),
             postId: z.string(),
             userId: z.string(),
             token: z.string(),

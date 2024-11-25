@@ -48,7 +48,7 @@ export function SideBar() {
                             </Link>
                         </StyledPost>
                     ))
-                ) : <Message>Não encontramos nenhum evento {loggedUserData ? "em " + loggedUserData?.state : null}</Message>}
+                ) : !loggedUserData? <Message>Faça login ou crie uma conta para ver eventos no seu estado!</Message>:<Message>Não encontramos nenhum evento em {loggedUserData?.state}</Message>}
             </PostsHolder>
         </Container>
     );

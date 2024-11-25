@@ -17,6 +17,7 @@ declare module 'styled-coponents' {
         texts: {
             text_100: string;
             text_300: string;
+            text_500: string;
             text_600: string;
             text_800: string;
             text_950: string;

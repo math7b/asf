@@ -10,6 +10,8 @@ export const Container = styled.div`
 `
 
 export const Menu = styled.ul`
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
