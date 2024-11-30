@@ -119,6 +119,21 @@ export interface UserMessage {
         comment?: {},
         postId?: string,
         commentId?: string,
-        userId?: string
+        userId?: string,
     };
+};
+
+export interface BeeInterface {
+    id: string,
+    name: string,
+    binomialNomenclature: string,
+};
+
+export interface BeeDataInterface {
+    id: string;
+    content: string;
+    value: number;
+    createdAt: Date;
+    updatedBy: UsersData[];
+    beeId: String;
 };

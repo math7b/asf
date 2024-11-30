@@ -60,41 +60,42 @@ export default function Home() {
                 </MenuItem>
             </Menu>
             <StyledPosts>
-                {loading ? 'Carregando as postagens aguarde...' : null}
-                {filteredPosts.length > 0 ? (
-                    filteredPosts.map((post: Post) => (
-                        <StyledPost key={post.id}>
-                            <Link to={`../posts/${post.id}`}>
-                                <div>
-                                    <Content>
-                                        <Title>
-                                            <p>{
-                                                post.option === "event" ? "[Evento]" :
-                                                    post.option === "help" ? "[Ajuda]" :
-                                                        post.option === "question" ? "[Duvida]" :
-                                                            post.option === "curiosity" ? "[Curiosidade]" :
-                                                                null
-                                            }</p>
-                                            <p>{post.title}</p>
-                                        </Title>
-                                        <Info>
-                                            {post.user.beeKeeper !== null ? <p>Apicultor</p> : null}
-                                            <p>{post.user?.name}</p>
-                                            <p>{post.value} Coins</p>
-                                            <time>{
-                                                formatDistanceToNow(post.createdAt, {
-                                                    locale: ptBR,
-                                                    addSuffix: true,
-                                                })
-                                            }</time>
-                                        </Info>
-                                    </Content>
-                                    <img src={flower} alt="" />
-                                </div>
-                            </Link>
-                        </StyledPost>
-                    ))
-                ) : <p>Sem postagens</p>}
+                {loading ? 'Carregando as postagens aguarde...' : (
+                    filteredPosts.length > 0 ? (
+                        filteredPosts.map((post: Post) => (
+                            <StyledPost key={post.id}>
+                                <Link to={`../posts/${post.id}`}>
+                                    <div>
+                                        <Content>
+                                            <Title>
+                                                <p>{
+                                                    post.option === "event" ? "[Evento]" :
+                                                        post.option === "help" ? "[Ajuda]" :
+                                                            post.option === "question" ? "[Duvida]" :
+                                                                post.option === "curiosity" ? "[Curiosidade]" :
+                                                                    null
+                                                }</p>
+                                                <p>{post.title}</p>
+                                            </Title>
+                                            <Info>
+                                                {post.user.beeKeeper !== null ? <p>Apicultor</p> : null}
+                                                <p>{post.user?.name}</p>
+                                                <p>{post.value} Coins</p>
+                                                <time>{
+                                                    formatDistanceToNow(post.createdAt, {
+                                                        locale: ptBR,
+                                                        addSuffix: true,
+                                                    })
+                                                }</time>
+                                            </Info>
+                                        </Content>
+                                        <img src={flower} alt="" />
+                                    </div>
+                                </Link>
+                            </StyledPost>
+                        ))
+                    ) : <p>Sem postagens</p>
+                )}
             </StyledPosts>
         </Container>
     );

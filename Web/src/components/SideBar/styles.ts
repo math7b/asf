@@ -8,11 +8,19 @@ export const Container = styled.div`
     width: 24vw;
     margin-left: 4vw;
     margin-right: 2vw;
+    max-width: 283px;
 `;
 
 export const PostsHolder = styled.div`
     background: ${props => props.theme.colors.color_white_opack};
     border-radius: 4px 4px 4px 4px;
+    button {
+        width: 100%;
+        border-radius: 4px;
+        a:hover {
+            text-decoration: underline;
+        }
+    }
 `;
 
 export const Message = styled.p`

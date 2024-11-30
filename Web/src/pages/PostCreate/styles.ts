@@ -28,7 +28,6 @@ export const Content = styled.div`
         border: 1px solid ${props => props.theme.texts.text_500};
         border-radius: 8px;
         p {
-            padding: 1rem;
             margin: 0;
         }
         &:focus {
@@ -75,10 +74,13 @@ export const EditorBar = styled.form`
         border: 1px solid ${props => props.theme.texts.text_500};
         border-radius: 8px;
     }
-    p, h2 {
-        padding: 1rem 2rem;
-        margin: 0;
+    
+    div {
+        div:last-child {
+            padding: 2rem 1rem;
+        }
     }
+    
     &:focus-within {
         border-color: ${props => props.theme.colors.color_600}; /* Change border color */
     }

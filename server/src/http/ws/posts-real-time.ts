@@ -12,4 +12,9 @@ export async function postRoutes(app: FastifyInstance) {
             connection.send(JSON.stringify(message));
         });
     });
+    app.get('/realtime/bee', { websocket: true }, (connection) => {
+        pubSub.subscribe('beedata', (message) => {
+            connection.send(JSON.stringify(message));
+        });
+    });
 }

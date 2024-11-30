@@ -1,17 +1,17 @@
-import { Blockquote } from '@tiptap/extension-blockquote'; // Import Blockquote for block quotes
-import { BulletList } from '@tiptap/extension-bullet-list'; // Bullet (unordered) list
-import { Code } from '@tiptap/extension-code'; // Import Code for inline code formatting
-import { Link as LinkExtension } from '@tiptap/extension-link'; // Import Link for hyperlinks
-import { OrderedList } from '@tiptap/extension-ordered-list'; // Ordered (numbered) list
-import { Strike } from '@tiptap/extension-strike'; // Import Strike for strikethrough text
+import { Blockquote } from '@tiptap/extension-blockquote';
+import { BulletList } from '@tiptap/extension-bullet-list';
+import { Code } from '@tiptap/extension-code';
+import { Link as LinkExtension } from '@tiptap/extension-link';
+import { OrderedList } from '@tiptap/extension-ordered-list';
+import { Strike } from '@tiptap/extension-strike';
 import { TextAlign } from '@tiptap/extension-text-align';
-import { TextStyle } from '@tiptap/extension-text-style'; // Import TextStyle extension for underlining text
-import { Underline } from '@tiptap/extension-underline'; // Import the extension
-import { EditorContent, useEditor } from '@tiptap/react'; // Import necessary functions from Tiptap
-import { StarterKit } from '@tiptap/starter-kit'; // Import the StarterKit for basic editor features
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Underline } from '@tiptap/extension-underline';
+import { EditorContent, useEditor } from '@tiptap/react';
+import { StarterKit } from '@tiptap/starter-kit';
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Toolbar } from '../../components/ToolBar'; // Create a custom toolbar component
+import { Toolbar } from '../../components/ToolBar';
 import { useUser } from "../../components/UserContext";
 import api from "../../services/api";
 import { Container, CustonInput } from "../../styles/global";
@@ -20,6 +20,9 @@ import {
 } from "./styles";
 
 export default function PostCreate() {
+    const isLoggedIn = localStorage.getItem("LoggedStatus");
+    const token = JSON.parse(localStorage.getItem("Token") || "null");
+
     const [title, setTitle] = useState('');
     const [option, setOption] = useState('');
     const [state, setState] = useState('');
@@ -27,10 +30,6 @@ export default function PostCreate() {
     const { loggedUserData } = useUser();
     const navigate = useNavigate();
 
-    const isLoggedIn = localStorage.getItem("LoggedStatus");
-    const token = JSON.parse(localStorage.getItem("Token") || "null");
-
-    // Tiptap Editor setup with multiple extensions
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -39,19 +38,15 @@ export default function PostCreate() {
             Code,
             LinkExtension,
             Blockquote,
-            BulletList, // Add the BulletList extension here
-            OrderedList, // Add the OrderedList extension here
-            Underline,  // Add Underline extension here
+            BulletList,
+            OrderedList,
+            Underline,
             TextAlign.configure({
-                types: ['paragraph', 'heading'], // Apply to paragraph and heading blocks
+                types: ['paragraph', 'heading'],
             }),
         ],
         content: '',
     });
-
-    const handleEventStateChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setState(event.target.value);
-    };
 
     async function handleNewPostCreate(event: FormEvent) {
         event.preventDefault();
@@ -71,6 +66,10 @@ export default function PostCreate() {
         } catch (error: any) {
             alert(error.response.data.message);
         }
+    };
+
+    const handleEventStateChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setState(event.target.value);
     };
 
     const handleNewTitleChange = (event: ChangeEvent<HTMLInputElement>) => {

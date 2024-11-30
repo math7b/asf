@@ -1,9 +1,9 @@
 import { FormEvent, MouseEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Container, Content, CustomisedInput, IsApicultor, IsApicultorCheckBox } from "./styles";
 import logoLight from '../../assets/logo-light.png';
-import api from "../../services/api";
 import { LoggonApi, NewUserRegister } from "../../interfaces";
+import api from "../../services/api";
+import { Container, Content, CustomisedInput, IsApicultor, IsApicultorCheckBox } from "./styles";
 
 export function Register() {
     const [email, setEmail] = useState("");

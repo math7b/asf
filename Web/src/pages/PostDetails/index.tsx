@@ -31,9 +31,7 @@ export default function PostDetails() {
     const { postId } = useParams<{ postId?: string }>();
     const navigate = useNavigate();
 
-
-    const [isReplying, setIsReplying] = useState(false);
-
+    // const [isReplying, setIsReplying] = useState(false);
 
     const mainEditor = useEditor({
         extensions: [
@@ -58,7 +56,6 @@ export default function PostDetails() {
             }
         },
     });
-
 
     const replyEditor = useEditor({
         extensions: [
@@ -98,10 +95,11 @@ export default function PostDetails() {
         if (openReplyBoxId !== commentId) {
             const replyContent = replyContents[commentId] || '';
             replyEditor?.commands.setContent(replyContent);
-            setIsReplying(true);
-        } else {
-            setIsReplying(false);
-        }
+            // setIsReplying(true);
+        } 
+        // else {
+        //     setIsReplying(false);
+        // }
     };
 
     const handleReplyContentChange = (commentId: string, content: string) => {
@@ -120,7 +118,6 @@ export default function PostDetails() {
             alert(error.response.data.message);
         }
     }
-
     async function handleCherishComment(event: React.MouseEvent, commentId: string) {
         event.preventDefault();
         try {
@@ -130,7 +127,6 @@ export default function PostDetails() {
             alert(error.response.data.message);
         }
     }
-
     async function handleDepreciatePost(event: React.MouseEvent) {
         event.preventDefault();
         try {
@@ -140,7 +136,6 @@ export default function PostDetails() {
             alert(error.response.data.message);
         }
     }
-
     async function handleDepreciateComment(event: React.MouseEvent, commentId: string) {
         event.preventDefault();
         try {
@@ -160,7 +155,6 @@ export default function PostDetails() {
             console.error('Error deleting post:', error);
         }
     }
-
     async function handleCommentDelete(event: React.MouseEvent, commentId: string) {
         event.preventDefault();
         try {
@@ -186,7 +180,6 @@ export default function PostDetails() {
             alert(error.response.data.message);
         }
     }
-
     async function handleNewReplyCreate(event: FormEvent, parentCommentId: string | null) {
         event.preventDefault();
         if (!isLoggedIn || !token) {
@@ -211,7 +204,7 @@ export default function PostDetails() {
             await api.post('/comment/sub', { content, postId, parentCommentId, userId, token });
             setOpenReplyBoxId(null);
             replyEditor?.commands.clearContent();
-            setIsReplying(false);
+            // setIsReplying(false);
         } catch (error) {
             console.error('Error posting reply:', error);
             alert('Erro ao enviar a resposta. Tente novamente.');
@@ -235,6 +228,7 @@ export default function PostDetails() {
                     }} disabled={!userId || comment.user.id === userId}>
                         <CaretDown size={20} />
                     </VoteButton>
+                    <div></div>
                 </Votes>
                 <Content>
                     <Info>
@@ -290,6 +284,7 @@ export default function PostDetails() {
                     }} disabled={!userId || post?.userId === userId}>
                         <CaretDown size={20} />
                     </VoteButton>
+                    <div></div>
                 </Votes>
                 <Content>
                     <Info>

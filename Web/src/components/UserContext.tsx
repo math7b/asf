@@ -29,7 +29,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         if (loggedUserData) {
             const userId = loggedUserData.id;
-            const socket = new WebSocket(`ws://localhost:3333/realtime/user/${userId}`);
+            const socket = new WebSocket(`ws://db-postgres:3333/realtime/user/${userId}`);
             socket.onopen = () => {
                 console.log('WebSocket connection established with userContext');
             };

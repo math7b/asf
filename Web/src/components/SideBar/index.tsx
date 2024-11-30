@@ -16,6 +16,7 @@ export function SideBar() {
     return (
         <Container>
             <PostsHolder>
+                <button><Link to={"/bee"}>Acesse nossa biblioteca de abelhas!</Link></button>
                 {stateFiltered.length > 0 ? (
                     stateFiltered.map((post: Post) => (
                         <StyledPost key={post.id}>

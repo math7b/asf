@@ -34,13 +34,13 @@ export type Comment = {
     content: string;
     value: number;
     createdAt: Date;
-    postId: string | null; // postId is optional, so it can be null
-    replies?: Comment[];   // replies are optional, a comment may or may not have replies
-    parentCommentId?: string | null; // parentCommentId is optional, can be null
-    userId: string; // userId is required (always associated with a user)
-    user: User; // user is required and is associated with a User
-    post?: Post | null; // post is optional and can be null
-    parentComment?: Comment | null; // parentComment is optional and can be null
+    postId: string | null;
+    replies?: Comment[];
+    parentCommentId?: string | null;
+    userId: string;
+    user: User;
+    post?: Post | null;
+    parentComment?: Comment | null;
 };
 
 export type Post = {
@@ -54,9 +54,23 @@ export type Post = {
     user: User;
 };
 
+export type BeeData = {
+    id: string;
+    content: string;
+    value: number;
+    createdAt: Date;
+    updatedBy: User[];
+    beeId: String;
+}
+
+export type Bee = {
+    id: string;
+    name: string;
+    binomialNomenclature: string;
+}
 export type Message = {
-    action: 'create' | 'delete' | 'cherish' | 'depreciate';
-    type: 'post' | 'comment';
+    action: 'create' | 'delete' | 'update' | 'cherish' | 'depreciate';
+    type: 'post' | 'comment' | 'bee' | 'beedata';
     data: {
         post?: {},
         postId?: string,
@@ -64,6 +78,9 @@ export type Message = {
         commentId?: string,
         commentCreator?: string,
         userId?: string,
+        bee?: Bee,
+        beeData?: BeeData,
+        updatedBeeData?: BeeData,
     };
 };
 export type Subscriber = (message: Message) => void;

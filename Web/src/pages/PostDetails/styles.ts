@@ -5,6 +5,10 @@ export const Votes = styled.div`
     flex-direction: column;
     align-items: center;
     padding-right: 8px;
+    p, time, span, label {
+        margin: 0;
+        padding: 0;
+    }
     p{
         font-size: 0.875rem;
     }
@@ -15,7 +19,7 @@ export const Votes = styled.div`
         height: 100%;
         min-height: 8px;
     }
-`
+`;
 
 export const VoteButton = styled.span<{ disabled?: boolean }>`
     cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
@@ -33,9 +37,12 @@ export const Content = styled.div`
     flex-direction: column;
     font-size: 1rem;
     line-height: 1.6;
-    
     color: ${props => props.theme.texts.text_800};
-`
+    p, time, span, label {
+        margin: 0;
+        padding: 0;
+    }
+`;
 
 export const Info = styled.div`
     display: flex;
@@ -57,7 +64,7 @@ export const Info = styled.div`
             color: ${props => props.theme.texts.text_800};
         }
     }
-`
+`;
 
 export const DeleteButton = styled.span<{ disabled?: boolean }>`
     cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
@@ -106,7 +113,7 @@ export const CreateComment = styled.form`
         visibility: visible;
         max-height: none;
     }
-`
+`;
 
 export const CreateReplay = styled.form`
     display: flex;
@@ -119,7 +126,7 @@ export const CreateReplay = styled.form`
         margin-top: 12px;
         padding: 0.30rem 0.70rem;
     }
-`
+`;
 
 export const EditorBar = styled.div`
     border-radius: 8px;
@@ -128,18 +135,19 @@ export const EditorBar = styled.div`
         border: 1px solid ${props => props.theme.texts.text_500};
         border-radius: 8px;
     }
+    div {
+        div:last-child {
+            padding: 2rem 1rem;
+        }
+    }
     p, h2 {
         padding: 1rem 2rem;
         margin: 0;
     }
     &:focus-within {
-        border-color: ${props => props.theme.colors.color_600}; /* Change border color */
+        border-color: ${props => props.theme.colors.color_600};
     }
-
-    /* Targeting the children div (Toolbar and EditorContent) */
-
-    /* Apply focused border styles to the child divs when EditorContent or Toolbar is focused */
     &:focus-within div {
-        border-color: ${props => props.theme.colors.color_600}; /* Change border color */
+        border-color: ${props => props.theme.colors.color_600};
     }
 `;

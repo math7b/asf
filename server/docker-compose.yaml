@@ -16,12 +16,12 @@ services:
       - asf-network
 
   asf-server:
-    image: asf-server:v1.6
+    image: asf-server:v2
     build:
       context: .
     container_name: asf-server
     ports:
-      - "3334:3333"
+      - "3333:3333"
     env_file:
       - .env
     depends_on:

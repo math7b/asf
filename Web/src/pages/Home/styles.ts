@@ -7,6 +7,7 @@ export const Container = styled.div`
     justify-content: start;
     width: 48vw;
     margin-right: 2vw;
+    max-width: 869px;
 `
 
 export const Menu = styled.ul`
@@ -21,6 +22,7 @@ export const Menu = styled.ul`
     padding: 4px;
     font-size: 0.875rem;
     width: 48vw;
+    max-width: 869px;
 `
 
 interface MenuItemProps {
