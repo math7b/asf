@@ -2,17 +2,17 @@ version: '3.7'
 
 services:
   frontend:
-    image: asf-web:v2
+    image: asf-web:v4.4
     build:
-      context: .  # Assuming your Vite app is inside a 'frontend' folder
+      context: .
     container_name: asf-web
     ports:
-      - "3000:3000"  # Expose Vite frontend
+      - "3000:3000"
     environment:
-      - VITE_API_URL=http://localhost:3333
+      - VITE_API_URL=http://asf-server:3333
     networks:
-      - asf-network  # Join the same network as backend for communication
+      - asf-network
 
 networks:
   asf-network:
-    external: true  # This should match the network defined in the backend's `docker-compose.yml`
+    external: true

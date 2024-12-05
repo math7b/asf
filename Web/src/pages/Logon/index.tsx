@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { LoggonApi } from "../../interfaces";
 import { CustonInput } from "../../styles/global";
 import logoLight from '../../assets/logo-light.png';
-import { useUser } from "../../components/UserContext";
+import { useUser } from "../../context/UserContext";
 
 export function Logon() {
     const [email, setEmail] = useState('');

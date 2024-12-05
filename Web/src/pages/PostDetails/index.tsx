@@ -14,7 +14,7 @@ import { ptBR } from 'date-fns/locale/pt-BR';
 import { CaretDown, CaretUp, Trash } from 'phosphor-react';
 import React, { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { usePosts } from '../../components/PostContext';
+import { usePosts } from '../../context/PostContext';
 import { Toolbar } from '../../components/ToolBar';
 import { Comment } from '../../interfaces';
 import api from '../../services/api';
@@ -25,7 +25,7 @@ export default function PostDetails() {
     const userId = JSON.parse(localStorage.getItem("LoggedUserId") || "null");
     const isLoggedIn = localStorage.getItem("LoggedStatus");
     const token = JSON.parse(localStorage.getItem("Token") || "null");
-    const { post, loading, error, fetchPostById } = usePosts();
+    const { post, error, fetchPostById } = usePosts();
     const [openReplyBoxId, setOpenReplyBoxId] = useState<string | null>(null);
     const [replyContents, setReplyContents] = useState<{ [key: string]: string }>({});
     const { postId } = useParams<{ postId?: string }>();
@@ -87,8 +87,6 @@ export default function PostDetails() {
             alert("Error loading post details.");
         }
     }, [error]);
-
-    if (loading) return <h1>Loading...</h1>;
 
     const toggleAnswerBox = (commentId: string) => {
         setOpenReplyBoxId(openReplyBoxId === commentId ? null : commentId);

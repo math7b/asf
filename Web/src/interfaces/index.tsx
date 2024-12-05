@@ -92,6 +92,12 @@ export interface UserContextType {
     logout: () => void;
 }
 
+export interface BeeContextType {
+    loggedUserData: LoggedUser | null;
+    updateLoggedUserData: (data: LoggedUser) => void;
+    logout: () => void;
+}
+
 export interface PostsState {
     posts: Post[];
     loading: boolean;
@@ -120,6 +126,18 @@ export interface UserMessage {
         postId?: string,
         commentId?: string,
         userId?: string,
+    };
+};
+
+export interface BeeMessage {
+    action: 'create' | 'delete' | 'cherish' | 'depreciate';
+    type: 'bee' | 'beedata';
+    data: {
+        userId?: string,
+        beeId?: string,
+        bee?: BeeInterface,
+        beeData?: BeeDataInterface,
+        updatedBeeData?: BeeDataInterface,
     };
 };
 

@@ -44,7 +44,7 @@ export async function deletePost(app: FastifyInstance) {
                 userId: userId,
             }
         })
-        pubSub.publish('postdetails', { action: 'delete', type: 'post', data: { postId, userId } })
+        pubSub.publish('beedata', { action: 'delete', type: 'beedata', data: { postId, userId } })
         return reply.status(201).send()
     })
 }

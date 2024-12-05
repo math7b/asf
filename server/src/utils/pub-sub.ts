@@ -78,6 +78,7 @@ export type Message = {
         commentId?: string,
         commentCreator?: string,
         userId?: string,
+        beeId?: string,
         bee?: Bee,
         beeData?: BeeData,
         updatedBeeData?: BeeData,

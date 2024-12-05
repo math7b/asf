@@ -2,7 +2,7 @@ import { Plus } from 'phosphor-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logoLight from '../../assets/logo-light.png';
-import { useUser } from '../UserContext';
+import { useUser } from '../../context/UserContext';
 import { ASFCash, ASFCoins, Coins, HeaderContainer, Logo } from './styles';
 
 export function Header() {

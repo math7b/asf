@@ -2,10 +2,10 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma";
 import { verifyToken } from "../token";
+import { pubSub } from "../../utils/pub-sub";
 
 export async function deleteBee(app: FastifyInstance) {
     app.delete('/bee/:beeId', async (request, reply) => {
-        // Validate input
         const zBeeId = z.object({
             beeId: z.string(),
         });
@@ -13,38 +13,27 @@ export async function deleteBee(app: FastifyInstance) {
             userId: z.string(),
             token: z.string(),
         });
-
-        // Parse request data
         const { beeId } = zBeeId.parse(request.params);
         const { userId, token } = zBeeBody.parse(request.query);
-
-        // Verify token
         const verifiedToken = verifyToken(token);
         if (!verifiedToken.valid) {
             return reply.status(400).send({ message: "Não autorizado" });
         }
-
-        // Ensure beeId is provided
         if (!beeId) {
             return reply.status(400).send({ message: "Id da abelha não encontrado" });
         }
-
         try {
-            // Delete associated beeData if it exists
             await prisma.beeData.deleteMany({
                 where: {
-                    beeId: beeId, // Delete beeData related to the given beeId
+                    beeId: beeId,
                 },
             });
-
-            // Delete the bee
             await prisma.bee.delete({
                 where: {
                     id: beeId,
                 },
             });
-
-            // Return a success response
+            pubSub.publish('beedata', { action: 'delete', type: 'bee', data: { beeId } })
             return reply.status(201).send();
         } catch (error) {
             console.error("Error deleting bee data or bee:", error);

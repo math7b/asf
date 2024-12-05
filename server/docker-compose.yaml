@@ -16,7 +16,7 @@ services:
       - asf-network
 
   asf-server:
-    image: asf-server:v2
+    image: asf-server:v4.1
     build:
       context: .
     container_name: asf-server

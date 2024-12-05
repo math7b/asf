@@ -3,7 +3,7 @@ import { ptBR } from "date-fns/locale/pt-BR";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import flower from '../../assets/flower.jpg';
-import { usePosts } from "../../components/PostContext";
+import { usePosts } from "../../context/PostContext";
 import { Post } from "../../interfaces";
 import {
     Container, Content, Info, Menu, MenuItem, StyledPost, StyledPosts, Title
@@ -53,11 +53,11 @@ export default function Home() {
                     onClick={() => handleToggleMenuOption("curiosity")}>
                     Curiosidades
                 </MenuItem>
-                <MenuItem
+                {/* <MenuItem
                     isActive={menuOption === "News"}
                     onClick={() => handleToggleMenuOption("News")}>
                     Novidades
-                </MenuItem>
+                </MenuItem> */}
             </Menu>
             <StyledPosts>
                 {loading ? 'Carregando as postagens aguarde...' : (

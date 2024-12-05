@@ -15,20 +15,6 @@ export async function getBeeData(app: FastifyInstance) {
             },
             include: {
                 updatedBy: true,
-                // {
-                // where: {
-                //         id: beeId
-                //     },
-                //     select: {
-                //         id: true,
-                //         name: true,
-                //         email: true,
-                //         state: true,
-                //         registeredAt: true,
-                //         beeKeeper: true,
-                //         updatedBeeData: true,
-                //     }
-                // }
             }
         })
         if (!beeData) {

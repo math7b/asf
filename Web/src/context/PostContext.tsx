@@ -24,7 +24,7 @@ export const PostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     useEffect(() => {
-            const socket = new WebSocket('ws://db-postgres:3333/realtime/posts');
+            const socket = new WebSocket('ws://localhost:3333/realtime/posts');
             socket.onopen = () => {
             console.log('WebSocket connection established with postContext');
         };

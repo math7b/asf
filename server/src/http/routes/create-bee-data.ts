@@ -34,6 +34,9 @@ export async function createBeeData(app: FastifyInstance) {
                 updatedBy: true
             }
         })
+        if (!beeData) {
+            return reply.status(404).send({ message: 'Erro no cadastro' });
+        }
         pubSub.publish('beedata', { action: 'create', type: 'beedata', data: { beeData } })
         return reply.status(201).send();
     });

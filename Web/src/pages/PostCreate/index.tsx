@@ -12,7 +12,7 @@ import { StarterKit } from '@tiptap/starter-kit';
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Toolbar } from '../../components/ToolBar';
-import { useUser } from "../../components/UserContext";
+import { useUser } from "../../context/UserContext";
 import api from "../../services/api";
 import { Container, CustonInput } from "../../styles/global";
 import {

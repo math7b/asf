@@ -92,6 +92,6 @@ export const DeleteButton = styled.span<{ disabled?: boolean }>`
     }
     &:hover {
         border-radius: 4px;
-        background: ${props => props.theme.colors.color_200};
+        // background: ${props => props.theme.colors.color_200};
     }
 `;

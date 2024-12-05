@@ -13,22 +13,21 @@ import { CaretDown, CaretUp } from "phosphor-react";
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { BeeDataInterface } from "../../interfaces";
-import { Buttons, EditorBar, PostForm } from "../../pages/PostCreate/styles";
-import { Content, VoteButton, Votes } from "../../pages/PostDetails/styles";
+import { Buttons, EditorBar, PostForm } from "../PostCreate/styles";
+import { Content, VoteButton, Votes } from "../PostDetails/styles";
 import api from "../../services/api";
-import { Toolbar } from "../ToolBar";
-import { useUser } from "../UserContext";
+import { Toolbar } from "../../components/ToolBar";
+import { useUser } from "../../context/UserContext";
 import { Container } from "./styles";
 
 export function BeeData() {
     const token = JSON.parse(localStorage.getItem("Token") || "null");
 
     const [beeData, setBeeData] = useState<BeeDataInterface | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-console.log(loading)
+
     const { beeId } = useParams<{ beeId?: string }>();
 
-    const { loggedUserData } = useUser(); // Assuming this hook provides user data
+    const { loggedUserData } = useUser();
     const userId = loggedUserData?.id;
 
     const editor = useEditor({
@@ -50,14 +49,11 @@ console.log(loading)
     });
 
     const fetchBeeData = async () => {
-        setLoading(true);
         try {
             const responseBee = await api.get<BeeDataInterface>(`/bee/${beeId}`);
             setBeeData(responseBee.data);
         } catch (error) {
             console.log('Failed to fetch posts.');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -77,46 +73,23 @@ console.log(loading)
         }
     };
 
-    async function handleCherishPost(event: React.MouseEvent) {
-        event.preventDefault();
-        // try {
-        //     await api.put(`/cherish/post/${postId}`, {}, { params: { userId, token } });
-        // } catch (error: any) {
-        //     console.error('Error cherishing post:', error);
-        //     alert(error.response.data.message);
-        // }
-    }
-    async function handleDepreciatePost(event: React.MouseEvent) {
-        event.preventDefault();
-        // try {
-        //     await api.put(`/depreciate/post/${postId}`, {}, { params: { userId, token } });
-        // } catch (error: any) {
-        //     console.error('Error depreciating post:', error);
-        //     alert(error.response.data.message);
-        // }
-    }
     return (
         <Container>
             {beeData ? (
                 <>
                     <Votes>
-                        <VoteButton onClick={(e) => {
-                            handleCherishPost(e);
-                        }}>
+                        <VoteButton>
                             <CaretUp size={20} />
                         </VoteButton>
                         <p>{beeData?.value}</p>
-                        <VoteButton onClick={(e) => {
-                            handleDepreciatePost(e);
-                        }}>
+                        <VoteButton>
                             <CaretDown size={20} />
                         </VoteButton>
                         <div></div>
                     </Votes>
                     <Content dangerouslySetInnerHTML={{ __html: beeData.content }} />
                 </>
-            ) : null}
-            {loggedUserData?.beeKeeper && !beeData ? (
+            ) : (loggedUserData?.beeKeeper) ? (
                 <PostForm onSubmit={handleBeeDataCreate}>
                     <label htmlFor="postContent">Conteúdo da postagem</label>
                     <Content>
@@ -134,7 +107,7 @@ console.log(loading)
                         <button type="submit">Enviar</button>
                     </Buttons>
                 </PostForm>
-            ) : null}
+            ) : <p>Ainda não ha informação aqui</p>}
         </Container>
     );
 }

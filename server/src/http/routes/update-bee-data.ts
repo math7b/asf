@@ -15,16 +15,20 @@ export async function updateBee(app: FastifyInstance) {
         });
         const { content, value, userId } = updateBeeSchema.parse(request.body);
         const { beeDataId } = zBeeDataId.parse(request.params);
+
+        // Update the type to allow null
         const beeData: BeeData | null = await prisma.beeData.findUnique({
             where: { id: beeDataId },
             include: {
                 updatedBy: true,
             },
         });
+
         if (!beeData) {
             return reply.status(404).send({ message: 'Dados da abelha não encontrado' });
         }
-        const updatedBeeData: BeeData | null = await prisma.beeData.update({
+
+        const updatedBeeData = await prisma.beeData.update({
             where: { id: beeDataId },
             data: {
                 content: content,
@@ -37,6 +41,7 @@ export async function updateBee(app: FastifyInstance) {
                 updatedBy: true,
             },
         });
+
         pubSub.publish('beedata', { action: 'update', type: 'beedata', data: { updatedBeeData } });
         return reply.status(200).send({ updatedBeeData });
     });

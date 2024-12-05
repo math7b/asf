@@ -16,6 +16,9 @@ export async function createBee(app: FastifyInstance) {
                 binomialNomenclature: binomialNomenclature
             }
         })
+        if (!bee) {
+            return reply.status(404).send({ message: 'Erro no cadastro' });
+        }
         pubSub.publish('beedata', { action: 'create', type: 'bee', data: { bee } })
         return reply.status(201).send();
     });

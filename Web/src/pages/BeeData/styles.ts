@@ -28,3 +28,7 @@ export const NewBeeForm = styled.form`
         margin-bottom: 8px;
     }
 `;
+
+export const Contributors = styled.div`
+
+`;

@@ -2,16 +2,22 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { Link } from "react-router-dom";
 import { Post } from "../../interfaces";
-import { usePosts } from "../PostContext";
-import { useUser } from "../UserContext";
+import { usePosts } from "../../context/PostContext";
+import { useUser } from "../../context/UserContext";
 import { Container, Content, Info, Message, PostsHolder, StyledPost, Title } from "./styles";
+import { useEffect, useState } from "react";
 
 export function SideBar() {
+    const [stateFiltered, setStateFiltered] = useState<Post[]>([]);
+
     const { posts } = usePosts();
     const { loggedUserData } = useUser();
 
-    const filteredPosts = posts.filter(post => post.option === "event");
-    const stateFiltered = filteredPosts.filter(post => post.state === loggedUserData?.state)
+    useEffect(() => {
+        const filteredPosts = posts.filter(post => post.option === "event");
+        const filteredByState = filteredPosts.filter(post => post.state === loggedUserData?.state);
+        setStateFiltered(filteredByState);
+    }, [posts, loggedUserData]);
 
     return (
         <Container>
