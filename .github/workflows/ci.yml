@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
 
@@ -24,4 +24,3 @@ jobs:
         working-directory: ../../web
     steps:
     - uses: actions/checkout@v4
-    # comentario
