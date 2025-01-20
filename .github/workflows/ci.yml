@@ -16,9 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: List files in server directory  # Debugging step
-      run: ls -la ../../server  # Check contents of the server folder
-
     - name: Setup node
       uses: actions/setup-node@v4
       with:
