@@ -16,11 +16,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-  build-web:
-    name: 'Build and Push Web'
-    runs-on: ubuntu-latest
-    defaults:
-      run:  
-        working-directory: ../../web
-    steps:
-    - uses: actions/checkout@v4
+  # build-web:
+  #   name: 'Build and Push Web'
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:  
+  #       working-directory: ../../web
+  #   steps:
+  #   - uses: actions/checkout@v4
