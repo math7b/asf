@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    build:
+  build:
     name: 'Build and Push Web'
     runs-on: ubuntu-latest
     defaults:
