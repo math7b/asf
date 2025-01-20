@@ -20,9 +20,9 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
-        cache: 'yarn'
-    - run: yarn
-    - run: yarn run test
+        cache: 'npm'
+    - run: npm install
+    - run: npm npm test
       
   # build-web:
   #   name: 'Build and Push Web'
