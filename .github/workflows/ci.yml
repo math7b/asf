@@ -1,1 +1,15 @@
+name: CI
 
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build:
+    name: 'Build and Push Server'
+    runs-on: ubuntu-latest
+    defaults:
+      run:  
+        working-directory: ../../server
