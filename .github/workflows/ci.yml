@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  build:
+  build-server:
     name: 'Build and Push Server'
     runs-on: ubuntu-latest
     defaults:
@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-  build:
+  build-web:
     name: 'Build and Push Web'
     runs-on: ubuntu-latest
     defaults:
