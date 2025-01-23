@@ -24,14 +24,5 @@ jobs:
       with:
         node-version: 20
         cache: 'npm'
+    - run: cd ./server
     - run: npm ci
-    - run: npm npm test
-      
-  # build-web:
-  #   name: 'Build and Push Web'
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:  
-  #       working-directory: ../../web
-  #   steps:
-  #   - uses: actions/checkout@v4
